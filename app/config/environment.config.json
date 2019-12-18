@@ -1,0 +1,43 @@
+{
+  "db": {
+    "development": {
+      "username": "root",
+      "password": "",
+      "host": "localhost",
+      "port": 2701,
+      "database": "zaqoota-auth-development"
+    },
+    "testing": {
+      "username": "",
+      "password": "",
+      "host": "",
+      "port": 2701,
+      "database": ""
+    },
+    "staging": {
+      "username": "",
+      "password": "",
+      "host": "",
+      "port": 2701,
+      "database": ""
+    },
+    "production": {
+      "username": "",
+      "password": "",
+      "host": "localhost",
+      "port": 2701,
+      "database": "zaqoota-auth-production" 
+    }
+  },
+  "FORCE_DB_SYNC": "false",
+  "jwtOptions": {
+    "secretOrKey": "boilerplate",
+    "ignoreExpiration": true,
+    "passReqToCallback": true
+  },
+  "awsConfig": {
+    "accessKeyId": "",
+    "secretAccessKey": "",
+    "region": ""
+  }
+}
