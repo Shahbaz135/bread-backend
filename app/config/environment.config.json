@@ -5,7 +5,7 @@
       "password": "",
       "host": "localhost",
       "port": 2701,
-      "database": "zaqoota-auth-development"
+      "database": "brotchengold-auth-development"
     },
     "testing": {
       "username": "",
@@ -26,7 +26,7 @@
       "password": "",
       "host": "localhost",
       "port": 2701,
-      "database": "zaqoota-auth-production" 
+      "database": "brotchengold-auth-production" 
     }
   },
   "FORCE_DB_SYNC": "false",

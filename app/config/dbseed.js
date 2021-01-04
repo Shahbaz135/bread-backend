@@ -12,8 +12,8 @@ module.exports = function dbseed (db, sequelize) {
     .then((role) => {
       let user = new db.User({
         fName: 'Muhammad',
-        lName: 'Ayaz',
-        phone: '03036200893',
+        lName: 'Shahbaz',
+        phone: '03001231234',
         language: 'eng',
         RoleId: role.id
       })

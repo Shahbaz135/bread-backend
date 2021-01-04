@@ -17,7 +17,7 @@ function signUp (input) {
     landphone: input.landphone || ` `,
     country: input.country,
     city: input.city,
-    user_type = input.user_type,
+    // user_type = input.user_type,
     RoleId: 1
   }
 
@@ -68,7 +68,7 @@ function signUp (input) {
         landphone: newUser.landphone,
         country: newUser.country,
         city: newUser.city,
-        user_type = newUser.user_type,
+        // user_type = newUser.user_type,
         // isVerified: newUser.isVerified,
         // isBlocked: newUser.isBlocked,
       }
