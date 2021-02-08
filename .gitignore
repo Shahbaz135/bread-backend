@@ -3,3 +3,5 @@ sendgrid.env
 package-lock.json
 app/helpers/temp.pdf
 .DS_Store
+public/uploads
+public 

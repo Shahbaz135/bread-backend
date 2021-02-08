@@ -18,7 +18,10 @@ module.exports = function (app, passport) {
   }))
   app.use(expressValidator())
 
-  app.use(fileUpload())
+  // app.use(fileUpload())
+
+  app.use("/images", express.static(path.join(__dirname, '../../public/partners') ));
+  app.use("/images", express.static(path.join(__dirname, '../../public/products') ));
 
   // enabling cors
   app.use(cors())

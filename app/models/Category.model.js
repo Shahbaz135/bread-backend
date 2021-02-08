@@ -7,17 +7,7 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(100),
         require: true
       },
-      titleUrdu: {
-        type: DataTypes.STRING(100)
-      },
-      thumb: {
-        type: DataTypes.STRING(100)
-      },
       isActive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
-      },
-      showInFilters: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
       },
@@ -30,6 +20,10 @@ module.exports = function (sequelize, DataTypes) {
     {
       associate: function (models) {
         Category.hasMany(models.Product, { foreignKey: 'CategoryId', as: 'relatedProducts' })
+        Category.belongsTo(models.Partner, {
+          as: 'PartnerCategory',
+          foreignKey: 'PartnerId'
+        })
       }
     }
   )

@@ -2,6 +2,44 @@
 const db = require('../config/sequelize.config')
 const generalHelpingMethods = require('./general.helper')
 const _ = require('lodash')
+const SERVER_RESPONSE = require('../config/serverResponses')
+
+
+///// add new product
+function addProduct(data, file) {
+  data.image = `images/` + file.filename
+  //// check if name of product is already added by partner
+  return db.Product.findOne({
+    where : {
+      name: data.name,
+      PartnerId: data.PartnerId
+    }
+  })
+  .then(async (product) => {
+    const errorsArray = []
+    // check product existence
+    if (product) {
+      // product already exist.
+      errorsArray.push({
+        field: 'name',
+        error: 1500,
+        message: 'product already exist with this name'
+      })
+    }
+
+    if (!_.isEmpty(errorsArray)) {
+      return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
+    }
+    
+    let newProduct = db.Product.build(data);
+    await newProduct.save()
+
+    return {
+    id: newProduct.id,
+    name: newProduct.name,
+    }
+  })
+}
 
 // search products
 function searchProducts (conditions, limit = 50, offset = 0) {
@@ -91,6 +129,7 @@ const deleteProduct = (input) => {
 }
 
 module.exports = {
+  addProduct,
   searchProducts,
   updateProduct,
   deleteProduct

@@ -4,6 +4,18 @@ const productHelper = require('../helpers/product.helper')
 const StandardError = require('standard-error')
 const generalController = require('./general.controller')
 
+// Add Product
+const addProduct = function (req, res) {
+  return productHelper.addProduct(req.body, req.file)
+    .then(function (data) {
+      generalController.successResponse(res, 'Product added successfully.', data, 'product.controller.addProduct')
+    }).catch(StandardError, function (err) {
+      generalController.errorResponse(res, err, null, 'product.controller.addProduct', SERVER_RESPONSE.VALIDATION_ERROR)
+    }).catch(function (err) {
+      generalController.errorResponse(res, err, 'Please check originalError for details', 'product.controller.addProduct', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
 // Search Products
 const searchProducts = function (req, res) {
   return productHelper.searchProducts(req.conditions, req.limit, req.offset)
@@ -39,6 +51,7 @@ const deleteProduct = (req, res) => {
 }
 
 module.exports = {
+  addProduct,
   searchProducts,
   updateProduct,
   deleteProduct

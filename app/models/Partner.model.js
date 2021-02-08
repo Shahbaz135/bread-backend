@@ -15,6 +15,7 @@ module.exports = function(sequelize, DataTypes) {
                 unique: true
             },
             password: DataTypes.STRING,
+            salt: DataTypes.STRING,
             image: {
                 type: DataTypes.STRING(100),
                 require: true
@@ -28,28 +29,66 @@ module.exports = function(sequelize, DataTypes) {
                 type: DataTypes.INTEGER,
                 require: true
             },
-            address: {
+            houseStreetNumber: {
                 type: DataTypes.STRING(100),
                 require: true,
             },
+            town: {
+                type: DataTypes.STRING
+            },
+            iban: {
+                type: DataTypes.STRING,
+                require: true
+            },
             isVerified: {
                 type: DataTypes.BOOLEAN,
-                defaultValue: false
+                defaultValue: true
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
-                defaultValue: false
+                defaultValue: true
             },
             isDeleted: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
-            },
-            creationTime: {
-                type: DataTypes.DATE,
-                defaultValue: Date.now()
+            }
+        }, {
+            associate: function (models) {
+                Partner.hasMany(models.Customer, {
+                    as: 'PartnerCustomers',
+                    foreignKey: 'PartnerId'
+                })
+                Partner.hasMany(models.Category, {
+                    as: 'PartnerCategory',
+                    foreignKey: 'PartnerId'
+                })
+                Partner.hasMany(models.Product, {
+                    as: 'PartnerProduct',
+                    foreignKey: 'PartnerId'
+                })
+                Partner.hasMany(models.Order, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerOrders'
+                })
             }
         }
     )
+
+    Partner.prototype.makeSalt = function () {
+        return crypto.randomBytes(16).toString('base64');
+    }
+
+    Partner.prototype.authenticate = function (plainText) {
+        return this.encryptPassword(plainText, this.salt).toString() === this.password.toString()
+    }
+
+    Partner.prototype.encryptPassword = function (password, salt) {
+        if (!password || !salt) {
+          return ''
+        }
+        salt = new Buffer.from(salt, 'base64')
+        return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('base64')
+    }
 
     return Partner
 }

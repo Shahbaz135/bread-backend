@@ -5,7 +5,7 @@ const userController = require('../controllers/user.controller')
 const passport = require('../config/passport') 
 
 module.exports = function (app, apiVersion) { 
-  const route = apiVersion 
+  const route = apiVersion
 
   // ------------- Public Apis Start -------------
   // user-signup

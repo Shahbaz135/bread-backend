@@ -22,11 +22,11 @@
       "database": ""
     },
     "production": {
-      "username": "",
-      "password": "",
+      "username": "tempylan_root",
+      "password": "Bread@321",
       "host": "localhost",
-      "port": 2701,
-      "database": "brotchengold-auth-production" 
+      "port": 3306,
+      "database": "tempylan_brotchengold_auth_production" 
     }
   },
   "FORCE_DB_SYNC": "false",

@@ -2,26 +2,207 @@
 const generalMiddleware = require('./general.middleware')
 const _ = require('lodash')
 
-// validate get user
+
+// registration validation
+const validateAddProduct = (req, res, done) => {
+  const body = req.body;
+  // get all the errors in an array
+  const errorArray = [];
+
+  //// checking product images and validating type
+  if (!req.file) {
+    errorArray.push({
+      field: 'image',
+      error: 1006,
+      message: 'Please provide valid image. Only gif/png/jgp allowed'
+    })
+  }
+
+
+  // Name is required, validating it as not empty, valid String and length range.
+  if (_.isEmpty(body.name) || !_.isString(body.name) || body.name.length < 2 || body.name.length > 100) 
+  {
+    errorArray.push({
+    field: "Name",
+    error: 1000,
+    message:
+        "'name' is required as string, length must be between 2 and 100.",
+    });
+  }
+
+  // designation is required, validating it as not empty, valid String and length range.
+  if ( _.isEmpty(body.designation) || !_.isString(body.designation) ) 
+  {
+    errorArray.push({
+    field: "Designation",
+    error: 1000,
+    message:
+        "'designation' is required as string.",
+    });
+  }
+
+  // shortDescription is required, validating it as not empty.
+  if ( _.isEmpty(body.shortDescription) || !_.isString(body.shortDescription) ) 
+  {
+    errorArray.push({
+    field: "shortDescription",
+    error: 1015,
+    message:
+        "'shortDescription' is required as string.",
+    });
+  }
+
+  // description is an optional string property, if it is given than validate it.
+  if (body['description'] || body['description'] != ``) {
+  // Validating as not empty, valid String and length range.
+    if (_.isEmpty(body.description) || !_.isString(body.description)) {
+      errorArray.push({
+        field: 'description',
+        error: 5000,
+        message: 'Please provide only valid \'description\' as string.'
+      })
+    }
+  }
+
+  //   product price is required, validating it as not empty, valid String 
+  if (_.isEmpty(body.productPrice) || _.isNaN(body.productPrice) ) {
+    errorArray.push({
+    field: 'productPrice',
+    error: 1015,
+    message: '\'productPrice\' is required as string.'
+    })
+  }
+
+  //   purchasing price is required, validating it as not empty, valid String 
+  if (_.isEmpty(body.purchasingPrice) || _.isNaN(body.purchasingPrice) ) {
+    errorArray.push({
+    field: 'purchasingPrice',
+    error: 1015,
+    message: '\'purchasingPrice\' is required as string.'
+    })
+  }
+
+  // label is an optional string property, if it is given than validate it.
+  if (body['label'] || body['label'] != ``) {
+    // Validating as not empty, valid String and length range.
+    if (_.isNaN(body.label)) {
+      errorArray.push({
+        field: 'label',
+        error: 5000,
+        message: 'Please provide only valid \'label\' as number.'
+      })
+    }
+  }
+
+  // item is an optional string property, if it is given than validate it.
+  if (body['item'] || body['item'] !=  ``) {
+    // Validating as not empty, valid String and length range.
+    if (_.isNaN(body.item)) {
+      errorArray.push({
+        field: 'item',
+        error: 5000,
+        message: 'Please provide only valid \'item\' as number.'
+      })
+    }
+  }
+
+  // vat rate is required, validating it as not empty, valid String 
+  if (_.isEmpty(body.vatRate) || _.isNaN(body.vatRate) ) {
+    errorArray.push({
+    field: 'vatRate',
+    error: 1015,
+    message: '\'vatRate\' is required as number.'
+    })
+  }
+
+  // order from is required, validating it as not empty, valid date
+  if (_.isEmpty(body.orderFrom) || !_.isString(body.orderFrom) ) {
+    errorArray.push({
+    field: 'orderFrom',
+    error: 1015,
+    message: '\'orderFrom\' is required as date.'
+    })
+  }
+
+  // availableDays is required, validating it as not empty
+  if (_.isEmpty(body.availableDays) || !_.isString(body.availableDays) ) {
+    errorArray.push({
+    field: 'availableDays',
+    error: 1015,
+    message: '\'availableDays\' is required as array.'
+    })
+  }
+
+  // is active is required, validating it as boolean
+  if (_.isEmpty(body.isActive) || !_.isString(body.isActive)) {
+    errorArray.push({
+    field: 'isActive',
+    error: 1015,
+    message: '\'isActive\' is required as boolean.'
+    })
+  }
+
+
+  // isTrailAvailable is required, validating it as boolean
+  if (!_.isString(body.isTrailAvailable) || _.isEmpty(body.isTrailAvailable)) {
+    errorArray.push({
+    field: 'isTrailAvailable',
+    error: 1015,
+    message: '\'isTrailAvailable\' is required as boolean.'
+    })
+  }
+
+  // isHideOnSupplierOrder is required, validating it as boolean
+  if (!_.isString(body.isHideOnSupplierOrder) || _.isEmpty(body.isHideOnSupplierOrder)) {
+    errorArray.push({
+    field: 'isHideOnSupplierOrder',
+    error: 1015,
+    message: '\'isHideOnSupplierOrder\' is required as boolean.'
+    })
+  }
+
+  // partner id is required, validating as not empty, valid numeric value with range.
+  if (!body.partnerId || isNaN(body.partnerId)) {
+      errorArray.push({
+      field: 'partnerId',
+      error: 90071,
+      message: '\'partnerId\' is required as numeric.'
+      })
+  }
+  body.PartnerId = body.partnerId
+  
+  // category id is required, validating as not empty, valid numeric value with range.
+  if (!body.categoryId || isNaN(body.categoryId)) {
+    errorArray.push({
+    field: 'categoryId',
+    error: 90071,
+    message: '\'categoryId\' is required as numeric.'
+    })
+  }
+  body.CategoryId = body.categoryId
+
+  // send array if error(s)
+  if (errorArray.length) {
+    return generalMiddleware.standardErrorResponse(
+      res,
+      errorArray,
+      "customer.middleware.validateRegistration"
+    );
+  }
+
+  req.body = body;
+  done();
+};
+
+
+
+// validate search product
 const validateSearchProducts = (req, res, done) => {
   const errorArray = []
   const query = req.query
   const validatedQuery = {}
   let limit = 50
   let offset = 0
-
-  // name is an optional string property, if it is given than validate it.
-  if (query.hasOwnProperty('name')) {
-    // Validating as not empty, valid String and length range.
-    if (_.isEmpty(query.name)) {
-      errorArray.push({
-        field: 'name',
-        error: 5000,
-        message: 'Please provide only valid \'name\' as string.'
-      })
-    }
-    validatedQuery.name = query.name
-  }
 
   // SupplierId is an optional numeric property, if it is given than validate it.
   if (query.hasOwnProperty('SupplierId') && query.SupplierId) {
@@ -207,6 +388,7 @@ const validateDeleteProduct = (req, res, done) => {
 }
 
 module.exports = {
+  validateAddProduct,
   validateSearchProducts,
   validateUpdateProduct,
   validateDeleteProduct

@@ -7,18 +7,49 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(100),
         require: true
       },
-      nameUrdu: {
-        type: DataTypes.STRING(100)
-      },
-      unit: {
+      designation: {
         type: DataTypes.STRING(100),
         require: true
       },
-      unitUrdu: {
+      shortDescription: {
         type: DataTypes.STRING(100)
       },
-      thumb: {
+      productPrice: {
+        type: DataTypes.INTEGER,
+        require: true
+      },
+      purchasingPrice: {
+        type: DataTypes.INTEGER,
+        require: true
+      },
+      label: {
+        type: DataTypes.INTEGER,
+      },
+      item: {
+        type: DataTypes.INTEGER,
+      },
+      description: {
+        type: DataTypes.STRING(200)
+      },
+      vatRate: {
+        type: DataTypes.INTEGER
+      },
+      image: {
         type: DataTypes.STRING(100)
+      },
+      orderFrom: {
+        type: DataTypes.DATEONLY,
+      },
+      isTrailAvailable: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      },
+      availableDays: {
+        type: DataTypes.JSON
+      },
+      isHideOnSupplierOrder: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -33,7 +64,10 @@ module.exports = function (sequelize, DataTypes) {
     {
       associate: function (models) {
         Product.belongsTo(models.Category)
-        Product.hasMany(models.SupplierProduct, { foreignKey: 'ProductId', as: 'relatedProducts' })
+        Product.belongsTo(models.Partner, {
+          as: 'PartnerProduct',
+          foreignKey: 'PartnerId'
+        })
       }
     }
   )

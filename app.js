@@ -8,7 +8,7 @@ const passport = require('./app/config/passport')
 const app = express()
 // Middleware to capture any HTTP responses
 
-app.get('/api/v1/auth/health', function (req, res) {
+app.get('/health', function (req, res) {
   return res.status(200).send('Auth micro-service working 100%... \n 26 October, 2019 - 1:15 PM')
 })
 global.winston = require('./app/config/winston')
