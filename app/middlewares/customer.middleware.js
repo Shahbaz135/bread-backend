@@ -571,8 +571,49 @@ const validateGetCustomerById = (req, res, done) => {
     req.limit = limit
     req.offset = offset
     done()
+}
+
+///// for change password by customers
+///// get customers by id
+const validateChangePassword = (req, res, done) => {
+    const errorArray = []
+    const body = req.body
+    const validatedCondition = {}
+
+  
+    // id is a numeric property, if it is given than validate it.
+  
+    // Validating as not empty, valid numeric value with range.
+    if (!body.id || isNaN(body.id)) {
+    errorArray.push({
+        field: 'id',
+        error: 5005,
+        message: 'Please provide only valid \'id\' as numeric.'
+    })
+    }
+    validatedCondition.id = body.id
+  
+    // password is required, if it is given than validate it.
+      // Validating as not empty, valid numeric value with range.
+      if (_.isEmpty(body.password || !_.isString(body.password))) {
+        errorArray.push({
+          field: 'password',
+          error: 5010,
+          message: 'Please provide only valid \'password\' as string.'
+        })
+      }
+      validatedCondition.password = body.password
+  
+    if (!_.isEmpty(errorArray)) {
+      return generalMiddleware.standardErrorResponse(res, errorArray, 'customer.middleware.validateChangePassword')
+    }
+  
+    req.conditions = validatedCondition
+
+    done()
 
 }
+
 
 
 module.exports = {
@@ -580,5 +621,6 @@ module.exports = {
     validateLoginCredentials,
     validateGetCustomers,
     validateUpdateCustomer,
-    validateGetCustomerById
+    validateGetCustomerById,
+    validateChangePassword
 }

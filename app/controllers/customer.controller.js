@@ -51,12 +51,36 @@ const getCustomerById = function (req, res) {
     })
 }
 
+const checkPassword = function (req, res) {
+    return customerHelper.checkPassword(req.conditions)
+        .then(function (data) {
+        generalController.successResponse(res, 'Password is valid', data, 'customer.controller.checkPassword')
+        }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'customer.controller.checkPassword', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.checkPassword', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
+const changePassword = function (req, res) {
+    return customerHelper.changePassword(req.conditions)
+        .then(function (data) {
+        generalController.successResponse(res, 'Password updated successfully', data, 'customer.controller.changePassword')
+        }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'customer.controller.changePassword', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.changePassword', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
 
 module.exports = {
     register,
     login,
     updateCustomer,
-    getCustomerById
+    getCustomerById,
+    checkPassword,
+    changePassword
     // getPartnerByPostalCode,
     // getAllPartners
   }

@@ -18,6 +18,10 @@ module.exports = function (app, apiVersion) {
 
     app.get(route + '/customer/getById', customerMiddleware.validateGetCustomerById, customerController.getCustomerById)
 
+    app.post(route + '/customer/checkPassword', customerMiddleware.validateChangePassword, customerController.checkPassword)
+
+    app.post(route + '/customer/changePassword', customerMiddleware.validateChangePassword, customerController.changePassword)
+
     // app.get(route + '/getAllPartners', partnerMiddleware.validateGetAllPartners, partnerController.getAllPartners)
 
 

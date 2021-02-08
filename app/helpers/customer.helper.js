@@ -201,8 +201,6 @@ function getCustomerById(data) {
 }
 
 const updateCustomer = (data, id) => {
-  console.log(`data ===`, data);
-  console.log(`id ==`, id)
   return db.Customer.findOne({
     where: {
       id: id,
@@ -227,12 +225,83 @@ const updateCustomer = (data, id) => {
     })
 }
 
+////// check customer`s password
+const checkPassword = (data) => {
+  let id = data.id;
+  let password = data.password;
+
+  /// finding user by id
+  return db.Customer.findOne({
+    where: {
+      id: id,
+      isDeleted: false
+    }
+  })
+    .then((customer) => {
+      if (_.isEmpty(customer)) {
+        // Product not found, return error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'id',
+          error: 1572,
+          message: 'customer not found of given id.'
+        }])
+      } else if (!customer.authenticate(password)) {
+        // user not authenticated, throw error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'password',
+          error: 1543,
+          message: 'Incorrect Password'
+        }])
+      } else {
+        return true;
+      }
+    })
+}
+
+////// check customer`s password
+const changePassword = (data) => {
+  let id = data.id;
+  let password = data.password;
+
+  /// finding user by id
+  return db.Customer.findOne({
+    where: {
+      id: id,
+      isDeleted: false
+    }
+  })
+    .then((customer) => {
+      if (_.isEmpty(customer)) {
+        // Product not found, return error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'id',
+          error: 1572,
+          message: 'customer does not exist'
+        }])
+      } 
+
+      ///// updating password
+      let salt = customer.makeSalt();
+      let newPassword = customer.encryptPassword(password, salt);
+
+      let updatedData = {
+        salt: salt,
+        password: newPassword
+      }
+      
+      customer.set(updatedData);
+      return customer.save()
+    })
+}
+
 
 module.exports = {
     registration,
     login,
     updateCustomer,
-    getCustomerById
+    getCustomerById,
+    changePassword,
+    checkPassword
     // getPartnerByPostalCode,
     // getAllPartners
   }
