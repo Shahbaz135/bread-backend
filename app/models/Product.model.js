@@ -15,11 +15,11 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(100)
       },
       productPrice: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         require: true
       },
       purchasingPrice: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         require: true
       },
       label: {
@@ -68,6 +68,11 @@ module.exports = function (sequelize, DataTypes) {
           as: 'PartnerProduct',
           foreignKey: 'PartnerId'
         })
+        Product.belongsToMany(models.WeekDays, {
+          through: 'ProductDay',
+          as: 'productWeekDays',
+          foreignKey: 'ProductId'
+      })
       }
     }
   )

@@ -36,13 +36,23 @@ function createCategory(input) {
             return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
         }
         
-        let newCategory = db.Category.build(categoryObj);
-        await newCategory.save()
+        //// saving category
+        return db.Category.create(categoryObj)
+        .then(async (insertedCategory) => {
 
-        return {
-        id: newCategory.id,
-        name: newCategory.name,
+        // adding week days
+        let weekDays = input.weekDaysId;
+        const categoryDays = []
+        for (let i = 0; i < weekDays.length; i++) {
+            categoryDays.push({
+                CategoryId: insertedCategory.id,
+                WeekDaysId: weekDays[i]
+            })
         }
+        db.CategoryDay.bulkCreate(categoryDays)
+        return insertedCategory.save()
+        })
+        .catch(generalHelpingMethods.catchException)
     })
 }
 
@@ -82,6 +92,105 @@ async function getCategoriesOfPartner (input) {
         .catch(generalHelpingMethods.catchException)
 }
 
+function AllCategoriesByDay(data) {
+    let dayId = data.dayId;
+    let partnerId = data.partnerId;
+    return db.WeekDays.findOne({
+        where: {id: dayId},
+        include: 
+            [
+                {
+                    model: db.Category,
+                    where: { PartnerId: partnerId },
+                    as: `categoryDays`,
+                    required: false,
+                    // include: [
+                    //     {
+                    //         model: db.Product,
+                    //         as : 'relatedProducts',
+                    //         required: false,
+                    //         // include: [
+                    //         //     {
+                    //         //         model: db.WeekDays,
+                    //         //         as: `productWeekDays`,
+                    //         //         required: true,
+                    //         //     }
+                    //         // ]
+                    //     }
+                    // ],
+                }
+            ]
+    })
+    .then(days => {
+        // console.log(days.toJSON());
+        // return days.toJSON();
+        let result = days.toJSON();
+
+        db.WeekDays.findOne({
+            where: {id: dayId},
+            include: [
+                
+            ]
+        })
+    })
+}
+
+//// get all categories & products by day
+async function getCategoriesByDay(data) {
+    console.log(`data is ===`, data);
+    let dayId = data.dayId;
+    let partnerId = data.partnerId;
+
+    let query = {PartnerId: input.partnerId, isDeleted: false}
+
+    return db.Category.findOne({ where: query})
+    .then(res => {
+        console.log(res);
+        return res
+    })
+
+    // return db.WeekDays.findOne({
+    //     where: { id: dayId},
+    // //     include: [
+    // //         {
+    // //         model: db.Category,
+    // //         as: `categoryDays`,
+    // //         include: [
+    // //             {
+    // //                 model: db.Product,
+    // //                 as : 'relatedProducts',
+    // //                 required: true
+    // //             }
+    // //         ],
+
+    // //         through: { where: { PartnerId: partnerId } }
+    // //     }
+    // // ]
+    // })
+    //     .then(async result => {
+    //         console.log(result)
+    //         // let categories = JSON.stringify(result, null, 2)
+    //         // categories = JSON.parse(categories);
+    //         // console.log(categories);
+
+    //         ///// temp days
+    //         // let daysWithCategories = []
+    //         // let weeklyDays = [`MON`, `TUE`, `WED`, `THU`, `FRI`, `SAT`, `SUN`]
+    //         // for (let i=0; i< 7; i++) {
+    //         //     let obj = {
+    //         //         id: i+1,
+    //         //         day: weeklyDays[i],
+    //         //         categories: categories
+    //         //     }
+
+    //         //     daysWithCategories.push(obj);
+    //         // }
+
+    //         // return daysWithCategories;
+    //     })
+        // .catch(generalHelpingMethods.catchException)
+}
+
 
 ////// to edit the category
 function editCategory(data, id) {
@@ -106,5 +215,7 @@ function editCategory(data, id) {
 module.exports = {
     createCategory,
     getCategoriesOfPartner,
-    editCategory
+    editCategory,
+    getCategoriesByDay,
+    AllCategoriesByDay
 }

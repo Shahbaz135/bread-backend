@@ -27,6 +27,15 @@ const validateAddCategory = (req, res, done) => {
         })
     }
 
+    // weekDayId Is required, validating as array
+    if (!_.isArray(body.weekDaysId)) {
+      errorArray.push({
+      field: 'weekDaysId',
+      error: 90220,
+      message: '\'weekDaysId\' is required as Array .'
+      })
+  }
+
     // send array if error(s)
     if (errorArray.length) {
         return generalMiddleware.standardErrorResponse(res, errorArray, 'category.middleware.validateAddCategory')
@@ -49,6 +58,15 @@ const validateGetAllCategories = (req, res, done) => {
         message: '\'partnerId\' is required as Numeric .'
         })
     }
+
+    // day id Is required, validating as number
+    // if (!(query.dayId) || _.isNaN(query.dayId)) {
+    //   errorArray.push({
+    //   field: 'dayId',
+    //   error: 90220,
+    //   message: '\'dayId\' is required as Numeric .'
+    //   })
+    // }
 
     // send array if error(s)
     if (errorArray.length) {

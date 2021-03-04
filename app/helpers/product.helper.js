@@ -31,13 +31,30 @@ function addProduct(data, file) {
       return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
     }
     
-    let newProduct = db.Product.build(data);
-    await newProduct.save()
+    // let newProduct = db.Product.build(data);
+    // await newProduct.save()
 
-    return {
-    id: newProduct.id,
-    name: newProduct.name,
-    }
+    return db.Product.create(data)
+    .then(async (insertedProduct) => {
+
+      // adding week days
+      let dayIds = data.weekDaysId
+      const productDays = []
+      for (let i = 0; i < dayIds.length; i++) {
+        productDays.push({
+          ProductId: insertedProduct.id,
+          WeekDaysId: dayIds[i]
+        })
+      }
+      db.ProductDay.bulkCreate(productDays)
+      return insertedProduct.save()
+    })
+    .catch(generalHelpingMethods.catchException)
+
+    // return {
+    // id: newProduct.id,
+    // name: newProduct.name,
+    // }
   })
 }
 

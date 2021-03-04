@@ -35,6 +35,9 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(15),
         require: true,
       },
+      // roles: {
+      //   type: []
+      // },
       otp: DataTypes.STRING(5),
       otpValidTill: DataTypes.DATE,
      // language: DataTypes.STRING(3),

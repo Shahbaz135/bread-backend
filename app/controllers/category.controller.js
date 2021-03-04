@@ -19,13 +19,13 @@ const createCategory = function (req, res) {
 
 // Get all categories of partner
 const getAllCategories = function (req, res) {
-    return categoryHelper.getCategoriesOfPartner(req.conditions)
+    return categoryHelper.AllCategoriesByDay(req.conditions)
         .then((data) => {
             generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.register')
         }).catch(StandardError, (err) => {
-            generalController.errorResponse(res, err, null, 'category.controller.register', SERVER_RESPONSE.VALIDATION_ERROR)
+            generalController.errorResponse(res, err, null, 'category.controller.getAllCategories', SERVER_RESPONSE.VALIDATION_ERROR)
         }).catch((err) => {
-            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.register', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.getAllCategories', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
         })
 }
 
@@ -35,9 +35,9 @@ const updateCategories = function (req, res) {
         .then((data) => {
             generalController.successResponse(res, 'Category updated successfully.', data, 'category.controller.register')
         }).catch(StandardError, (err) => {
-            generalController.errorResponse(res, err, null, 'category.controller.register', SERVER_RESPONSE.VALIDATION_ERROR)
+            generalController.errorResponse(res, err, null, 'category.controller.updateCategories', SERVER_RESPONSE.VALIDATION_ERROR)
         }).catch((err) => {
-            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.register', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.updateCategories', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
         })
 }
 

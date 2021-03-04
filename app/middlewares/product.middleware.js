@@ -124,14 +124,24 @@ const validateAddProduct = (req, res, done) => {
     })
   }
 
-  // availableDays is required, validating it as not empty
-  if (_.isEmpty(body.availableDays) || !_.isString(body.availableDays) ) {
+  // weekDayId Is required, validating as array
+  body.weekDaysId = JSON.parse(body.weekDaysId)
+  if (!_.isArray(body.weekDaysId)) {
     errorArray.push({
-    field: 'availableDays',
-    error: 1015,
-    message: '\'availableDays\' is required as array.'
+    field: 'weekDaysId',
+    error: 90220,
+    message: '\'weekDaysId\' is required as Array .'
     })
   }
+
+  // // availableDays is required, validating it as not empty
+  // if (_.isEmpty(body.availableDays) || !_.isString(body.availableDays) ) {
+  //   errorArray.push({
+  //   field: 'availableDays',
+  //   error: 1015,
+  //   message: '\'availableDays\' is required as array.'
+  //   })
+  // }
 
   // is active is required, validating it as boolean
   if (_.isEmpty(body.isActive) || !_.isString(body.isActive)) {
