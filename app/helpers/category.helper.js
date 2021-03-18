@@ -95,100 +95,77 @@ async function getCategoriesOfPartner (input) {
 function AllCategoriesByDay(data) {
     let dayId = data.dayId;
     let partnerId = data.partnerId;
-    return db.WeekDays.findOne({
-        where: {id: dayId},
-        include: 
+    return db.WeekDays.findAll({
+        // where: {id: dayId},
+        attributes: [`id`, `day`],
+        include:
             [
                 {
                     model: db.Category,
                     where: { PartnerId: partnerId },
                     as: `categoryDays`,
+                    attributes: [`id`, `title`],
+                    through: {attributes: []},
                     required: false,
-                    // include: [
-                    //     {
-                    //         model: db.Product,
-                    //         as : 'relatedProducts',
-                    //         required: false,
-                    //         // include: [
-                    //         //     {
-                    //         //         model: db.WeekDays,
-                    //         //         as: `productWeekDays`,
-                    //         //         required: true,
-                    //         //     }
-                    //         // ]
-                    //     }
-                    // ],
                 }
             ]
     })
-    .then(days => {
-        // console.log(days.toJSON());
-        // return days.toJSON();
-        let result = days.toJSON();
+    .then(async days => {
 
-        db.WeekDays.findOne({
-            where: {id: dayId},
-            include: [
-                
-            ]
-        })
+        // console.log(JSON.parse(JSON.stringify(days)));
+        let result = JSON.parse(JSON.stringify(days));
+
+        //// iterating through all days
+        for(let day of result) {
+            await fetchProducts(day)
+                .then(response => {
+                    // temp.push(response);
+                    day.categoryDays = response;
+                    // console.log(response);
+                })
+        }
+
+        return result;
     })
 }
 
-//// get all categories & products by day
-async function getCategoriesByDay(data) {
-    console.log(`data is ===`, data);
-    let dayId = data.dayId;
-    let partnerId = data.partnerId;
+function getCategoriesByDeliveryArea(data) {
+    // db.DeliveryArea.find()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
-    let query = {PartnerId: input.partnerId, isDeleted: false}
-
-    return db.Category.findOne({ where: query})
-    .then(res => {
-        console.log(res);
-        return res
-    })
-
-    // return db.WeekDays.findOne({
-    //     where: { id: dayId},
-    // //     include: [
-    // //         {
-    // //         model: db.Category,
-    // //         as: `categoryDays`,
-    // //         include: [
-    // //             {
-    // //                 model: db.Product,
-    // //                 as : 'relatedProducts',
-    // //                 required: true
-    // //             }
-    // //         ],
-
-    // //         through: { where: { PartnerId: partnerId } }
-    // //     }
-    // // ]
+    // let dayId = data.dayId;
+    // let partnerId = data.partnerId;
+    // return db.WeekDays.findAll({
+    //     // where: {id: dayId},
+    //     attributes: [`id`, `day`],
+    //     include:
+    //         [
+    //             {
+    //                 model: db.Category,
+    //                 where: { PartnerId: partnerId },
+    //                 as: `categoryDays`,
+    //                 attributes: [`id`, `title`],
+    //                 through: {attributes: []},
+    //                 required: false,
+    //             }
+    //         ]
     // })
-    //     .then(async result => {
-    //         console.log(result)
-    //         // let categories = JSON.stringify(result, null, 2)
-    //         // categories = JSON.parse(categories);
-    //         // console.log(categories);
+    // .then(async days => {
 
-    //         ///// temp days
-    //         // let daysWithCategories = []
-    //         // let weeklyDays = [`MON`, `TUE`, `WED`, `THU`, `FRI`, `SAT`, `SUN`]
-    //         // for (let i=0; i< 7; i++) {
-    //         //     let obj = {
-    //         //         id: i+1,
-    //         //         day: weeklyDays[i],
-    //         //         categories: categories
-    //         //     }
+    //     // console.log(JSON.parse(JSON.stringify(days)));
+    //     let result = JSON.parse(JSON.stringify(days));
 
-    //         //     daysWithCategories.push(obj);
-    //         // }
+    //     //// iterating through all days
+    //     for(let day of result) {
+    //         await fetchProducts(day)
+    //             .then(response => {
+    //                 // temp.push(response);
+    //                 day.categoryDays = response;
+    //                 // console.log(response);
+    //             })
+    //     }
 
-    //         // return daysWithCategories;
-    //     })
-        // .catch(generalHelpingMethods.catchException)
+    //     return result;
+    // })
 }
 
 
@@ -212,10 +189,57 @@ function editCategory(data, id) {
     })
 }
 
+
+////// function to get products
+function fetchProducts(data) {
+    return new Promise((resolve, reject) => {
+        let categories = data.categoryDays;
+        let dayId = data.id;
+        let categoryIds = categories.map(x => x.id);
+
+        db.WeekDays.findOne({
+            where: {id: dayId},
+            attributes: [`id`, `day`],
+            include: [
+                {
+                    model: db.Product,
+                    where: { CategoryId: categoryIds, isTrailAvailable: true },
+                    as: `productWeekDays`,
+                    attributes: [`id`, `name`, `designation`, `shortDescription`, `productPrice`, `purchasingPrice`, `description`, `image`, `CategoryId`],
+                    through: {attributes: []},
+                    required: false,
+                }
+            ]
+        })
+        .then(products => {
+            products = products.toJSON();
+            // console.log(`products === `, products)
+            let day = products.day;
+            let allCategories = data.categoryDays;
+            let allProducts = products.productWeekDays;
+            let finalCategory = [];
+
+            for (let i = 0; i < allCategories.length; i ++) {
+                allCategories[i].day = day;
+                finalCategory.push(allCategories[i]);
+
+                finalCategory[i].Products = [];
+                for (let product of allProducts) {
+                    if (allCategories[i].id === product.CategoryId) {
+                        finalCategory[i].Products.push(product);
+                    }
+                }
+            }
+
+            resolve(finalCategory);
+        })
+    })
+}
+
+
 module.exports = {
     createCategory,
     getCategoriesOfPartner,
     editCategory,
-    getCategoriesByDay,
     AllCategoriesByDay
 }

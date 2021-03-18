@@ -13,11 +13,4 @@ module.exports = function (app, apiVersion) {
 
     app.get(route + '/order/get', orderMiddleware.validateGetOrders, orderController.getOrders)
 
-
-    // app.post(route + '/customer/login', customerMiddleware.validateLoginCredentials, customerController.login)
-
-    // app.get(route + '/getAllPartners', partnerMiddleware.validateGetAllPartners, partnerController.getAllPartners)
-
-
-
 }

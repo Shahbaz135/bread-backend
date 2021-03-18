@@ -28,6 +28,11 @@ module.exports = function (sequelize, DataTypes) {
           as: 'OrderDetail',
           foreignKey: 'OrderId'
         })
+
+        CustomerOrder.belongsTo(models.WeekDays, {
+          as: 'OrderDay',
+          foreignKey: 'WeekDaysId'
+        })
       }
     }
   )

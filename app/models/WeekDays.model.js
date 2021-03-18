@@ -24,10 +24,27 @@ module.exports = function (sequelize, DataTypes) {
             as: 'categoryDays',
             foreignKey: 'WeekDaysId'
         })
+
         WeekDays.belongsToMany(models.Product, {
             through: 'ProductDay',
             as: 'productWeekDays',
             foreignKey: 'WeekDaysId'
+        })
+
+        WeekDays.belongsToMany(models.DeliveryArea, {
+          through: 'RegularDeliveryDays',
+          as: 'regularDeliveryDay',
+          foreignKey: 'WeekDaysId'
+      })
+
+      WeekDays.belongsToMany(models.DeliveryArea, {
+        through: 'SampleDeliveryDays',
+        as: 'sampleDeliveryDay',
+        foreignKey: 'WeekDaysId'
+    })
+
+        WeekDays.hasMany(models.CustomerOrder, {
+          foreignKey: 'WeekDaysId', as: 'OrderDay' 
         })
       }
     }

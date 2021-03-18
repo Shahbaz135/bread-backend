@@ -196,7 +196,7 @@ const validateAddProduct = (req, res, done) => {
     return generalMiddleware.standardErrorResponse(
       res,
       errorArray,
-      "customer.middleware.validateRegistration"
+      "product.middleware.validateAddProduct"
     );
   }
 
