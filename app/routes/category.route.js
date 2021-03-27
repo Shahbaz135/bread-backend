@@ -13,6 +13,8 @@ module.exports = function (app, apiVersion) {
 
     app.get(route + '/category/getByPartner', categoryMiddleware.validateGetAllCategories, categoryController.getAllCategories)
 
+    app.get(route + '/category/getByAreaRegular', categoryMiddleware.validateGetCategoriesByArea, categoryController.getCategoriesByAreaRegular)
+
 
     app.put(route + '/category/update/:id', categoryMiddleware.validateUpdateCategory, categoryController.updateCategories)
 

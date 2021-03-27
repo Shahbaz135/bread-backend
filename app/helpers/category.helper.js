@@ -129,45 +129,122 @@ function AllCategoriesByDay(data) {
     })
 }
 
-function getCategoriesByDeliveryArea(data) {
-    // db.DeliveryArea.find()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+function getCategoriesByDeliveryAreaRegular(data) {
+    let postCode = data.postCode;
+    let partnerId = data.partnerId;
+    let dayQuery = {};
 
-    // let dayId = data.dayId;
-    // let partnerId = data.partnerId;
-    // return db.WeekDays.findAll({
-    //     // where: {id: dayId},
-    //     attributes: [`id`, `day`],
-    //     include:
-    //         [
-    //             {
-    //                 model: db.Category,
-    //                 where: { PartnerId: partnerId },
-    //                 as: `categoryDays`,
-    //                 attributes: [`id`, `title`],
-    //                 through: {attributes: []},
-    //                 required: false,
-    //             }
-    //         ]
-    // })
-    // .then(async days => {
+    if (data.dayId) {
+        dayQuery.id = data.dayId;
+    }
 
-    //     // console.log(JSON.parse(JSON.stringify(days)));
-    //     let result = JSON.parse(JSON.stringify(days));
+    return db.DeliveryArea.findOne({
+        where: {postCode: postCode},
+        attributes: [`id`, `postCode`],
+        include:
+            [
+                {
+                    model: db.WeekDays,
+                    as: `regularDeliveryDay`,
+                    where: dayQuery,
+                    attributes: [`id`, `day`],
+                    through: {attributes: []},
+                    required: false,
+                }
+            ]
+    })
+    .then(async days => {
+        if (!days) {
+            return false
+        }
+        let result = days.toJSON();
+        let daysId = result.regularDeliveryDay.map(x => x.id);
+        return daysId;
+    })
+    .then(async daysId => {
+        return db.WeekDays.findAll({
+        where: {id: daysId},
+        attributes: [`id`, `day`],
+        include:
+            [
+                {
+                    model: db.Category,
+                    where: { PartnerId: partnerId },
+                    as: `categoryDays`,
+                    attributes: [`id`, `title`],
+                    through: {attributes: []},
+                    required: false,
+                }
+            ]
+        })
+        .then(async days => {
+            let result = JSON.parse(JSON.stringify(days));
 
-    //     //// iterating through all days
-    //     for(let day of result) {
-    //         await fetchProducts(day)
-    //             .then(response => {
-    //                 // temp.push(response);
-    //                 day.categoryDays = response;
-    //                 // console.log(response);
-    //             })
-    //     }
+            //// iterating through all days
+            for(let day of result) {
+                await fetchProducts(day)
+                    .then(response => {
+                        day.categoryDays = response;
+                    })
+            }
+            return result;
+        })
+    })
+    .then(result => {
+        let categoryDays = [];
+        let allDays = result.map(x => x.day);   
 
-    //     return result;
-    // })
+        //// iterating through result arr to finalize categories
+        for (let day of result) {
+            for (let category of day.categoryDays) {
+                // console.log(`category === `, category);
+                let currentDay = category.day;
+                let currentDayId = category.dayId;
+                let found = categoryDays.findIndex(x => x.title === category.title);
+                if (found === -1) {
+                    //// adding available days
+                    for (let product of category.Products) {
+                        product.availableDays = [];
+                        let obj = {
+                            day: currentDay,
+                            id: currentDayId
+                        }
+                        product.availableDays.push(obj);
+                    }
+                    categoryDays.push(category);
+                } else {
+                    //// if category already exist
+                    for (let product of category.Products) {
+                        // product.availableDays = [];
+                        let foundProduct = categoryDays[found].Products.findIndex(x => x.name === product.name);
+                        if (foundProduct === -1) {
+                            product.availableDays = [];
+                            let obj = {
+                                day: currentDay,
+                                id: currentDayId
+                            }
+                            
+                            product.availableDays.push(obj);
+                            categoryDays[found].Products.push(product);
+                        } else {
+                            //// if product already exist
+                            let obj = {
+                                day: currentDay,
+                                id: currentDayId
+                            }
+                            categoryDays[found].Products[foundProduct].availableDays.push(obj);
+                        }
+                    }
+                }
+            }
+        }
+
+        let data = {};
+        data.categoryDays = categoryDays;
+        data.allDays = allDays;
+        return data;
+    })
 }
-
 
 ////// to edit the category
 function editCategory(data, id) {
@@ -215,12 +292,14 @@ function fetchProducts(data) {
             products = products.toJSON();
             // console.log(`products === `, products)
             let day = products.day;
+            let dayId = products.id;
             let allCategories = data.categoryDays;
             let allProducts = products.productWeekDays;
             let finalCategory = [];
 
             for (let i = 0; i < allCategories.length; i ++) {
                 allCategories[i].day = day;
+                allCategories[i].dayId = dayId;
                 finalCategory.push(allCategories[i]);
 
                 finalCategory[i].Products = [];
@@ -241,5 +320,6 @@ module.exports = {
     createCategory,
     getCategoriesOfPartner,
     editCategory,
-    AllCategoriesByDay
+    AllCategoriesByDay,
+    getCategoriesByDeliveryAreaRegular
 }

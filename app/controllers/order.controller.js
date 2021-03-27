@@ -29,7 +29,46 @@ const getOrders = function (req, res) {
         })
 }
 
+// To Get order
+const getOrderById = function (req, res) {
+    return orderHelper.getOrderById(req.conditions)
+        .then((data) => {
+            generalController.successResponse(res, 'Orders fetched successfully.', data, 'order.controller. getOrderById')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'order.controller. getOrderById', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'order.controller. getOrderById', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+// To update order
+const updateOrder = function (req, res) {
+    return orderHelper.updateOrder(req.body.data, req.body.id)
+        .then((data) => {
+            generalController.successResponse(res, 'Order Updated successfully.', data, 'order.controller. updateOrderById')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'order.controller. updateOrderById', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'order.controller. updateOrderById', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+// To update order
+const deleteOrder = function (req, res) {
+    return orderHelper.deleteOrder(req.params)
+        .then((data) => {
+            generalController.successResponse(res, 'Order Deleted successfully.', data, 'order.controller. deleteOrder')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'order.controller. deleteOrder', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'order.controller. deleteOrder', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
 module.exports = {
     createOrder,
-    getOrders
+    getOrders,
+    getOrderById,
+    updateOrder,
+    deleteOrder
 }

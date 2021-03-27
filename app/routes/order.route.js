@@ -13,4 +13,12 @@ module.exports = function (app, apiVersion) {
 
     app.get(route + '/order/get', orderMiddleware.validateGetOrders, orderController.getOrders)
 
+    app.get(route + '/order/getById', orderMiddleware.validateGetOrderById, orderController.getOrderById)
+
+    // update product
+    app.put(route + '/order/:id', orderMiddleware.validateUpdateOrder, orderController.updateOrder)
+
+    // delete order
+    app.delete(route + '/order/:id', orderMiddleware.validateDeleteOrder, orderController.deleteOrder)
+
 }

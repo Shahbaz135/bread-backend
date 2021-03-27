@@ -1,10 +1,10 @@
 'use strict'
 
 module.exports = function (sequelize, DataTypes) {
-  let CustomerOrder = sequelize.define('CustomerOrder',
+  let CustomerAdditionalOrder = sequelize.define('CustomerAdditionalOrder',
     {
         quantity: {
-            type: DataTypes.INTEGER
+          type: DataTypes.INTEGER
         },
         product: {
             type: DataTypes.STRING(100),
@@ -24,12 +24,12 @@ module.exports = function (sequelize, DataTypes) {
     ,
     {
       associate: function (models) {
-        CustomerOrder.belongsTo(models.Order, {
-          as: 'OrderDetail',
-          foreignKey: 'OrderId'
+        CustomerAdditionalOrder.belongsTo(models.Order, {
+          as: 'AdditionalOrderDetail',
+          foreignKey: 'AdditionalOrderId'
         })
 
-        CustomerOrder.belongsTo(models.WeekDays, {
+        CustomerAdditionalOrder.belongsTo(models.WeekDays, {
           as: 'OrderDay',
           foreignKey: 'WeekDaysId'
         })
@@ -37,5 +37,5 @@ module.exports = function (sequelize, DataTypes) {
     }
   )
 
-  return CustomerOrder
+  return CustomerAdditionalOrder
 }

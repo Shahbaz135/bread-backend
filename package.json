@@ -13,6 +13,7 @@
   "license": "ISC",
   "homepage": "",
   "dependencies": {
+    "app": "^0.1.0",
     "bluebird": "^3.5.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",

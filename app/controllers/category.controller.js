@@ -21,11 +21,23 @@ const createCategory = function (req, res) {
 const getAllCategories = function (req, res) {
     return categoryHelper.AllCategoriesByDay(req.conditions)
         .then((data) => {
-            generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.register')
+            generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.getAllCategories')
         }).catch(StandardError, (err) => {
             generalController.errorResponse(res, err, null, 'category.controller.getAllCategories', SERVER_RESPONSE.VALIDATION_ERROR)
         }).catch((err) => {
             generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.getAllCategories', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+// Get all categories of partner
+const getCategoriesByAreaRegular = function (req, res) {
+    return categoryHelper.getCategoriesByDeliveryAreaRegular(req.conditions)
+        .then((data) => {
+            generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.getCategoriesByAreaRegular')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'category.controller.getCategoriesByAreaRegular', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.getCategoriesByAreaRegular', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
         })
 }
 
@@ -45,5 +57,6 @@ const updateCategories = function (req, res) {
 module.exports = {
     createCategory,
     getAllCategories,
-    updateCategories
+    updateCategories,
+    getCategoriesByAreaRegular
 }

@@ -29,24 +29,12 @@ const validateCreateOrder = (req, res, done) => {
     }
 
     // valid from is required, validating it as not empty, valid date
-    if (_.isEmpty(body.validFrom) || !_.isString(body.validFrom) ) {
+    if (_.isEmpty(body.deliveryDate) || !_.isString(body.deliveryDate) ) {
         errorArray.push({
-        field: 'validFrom',
+        field: 'deliveryDate',
         error: 1015,
-        message: '\'validFrom\' is required as date.'
+        message: '\'deliveryDate\' is required as date.'
         })
-    }
-
-    // expiry date is optional, validating it as not empty, valid number
-    if (body.hasOwnProperty('expiryDate') && body.expiryDate != ``) {
-        if (_.isEmpty(body.expiryDate) || !_.isString(body.expiryDate)) {
-            errorArray.push({
-            field: "expiryDate",
-            error: 1009,
-            message: "'expiryDate' is required as string",
-            });
-        }
-        validatedConditions.expiryDate = body.expiryDate;
     }
 
     // price Is required, validating as number
@@ -67,29 +55,6 @@ const validateCreateOrder = (req, res, done) => {
         })
     }
 
-    // is one time is optional, validating it as boolean
-    if (body.hasOwnProperty('isOneTime')) {
-        if (!_.isBoolean(body.isOneTime)) {
-            errorArray.push({
-            field: "isOneTime",
-            error: 1009,
-            message: "'isOneTime' is required as boolean",
-            });
-        }
-        validatedConditions.isOneTime = body.isOneTime
-    }
-
-    // is trail is optional, validating it as boolean
-    if (body.hasOwnProperty('isTrail')) {
-        if (!_.isBoolean(body.isTrail)) {
-            errorArray.push({
-            field: "isTrail",
-            error: 1009,
-            message: "'isTrail' is required as boolean",
-            });
-        }
-        validatedConditions.isTrail = body.isTrail
-    }
 
     // status is optional, validating it as boolean
     if (body.hasOwnProperty('status')) {
@@ -105,12 +70,12 @@ const validateCreateOrder = (req, res, done) => {
 
     // send array if error(s)
     if (errorArray.length) {
-        return generalMiddleware.standardErrorResponse(res, errorArray, 'order.middleware.validateCreateOrder')
+        return generalMiddleware.standardErrorResponse(res, errorArray, 'additionalOrder.middleware.validateCreateOrder')
     }
 
     validatedConditions.CustomerId = body.customerId;
     validatedConditions.PartnerId = body.partnerId;
-    validatedConditions.validFrom = body.validFrom;
+    validatedConditions.deliveryDate = body.deliveryDate;
     validatedConditions.overAllPrice = body.overAllPrice;
     validatedConditions.order = body.order;
 
@@ -152,33 +117,6 @@ const validateGetOrders = (req, res, done) => {
         validatedQuery.PartnerId = query.PartnerId
     }
 
-    
-    // isOne Time is an optional numeric property, if it is given than validate it.
-    if (query.hasOwnProperty('isOneTime')) {
-        query.isOneTime = JSON.parse(query.isOneTime);
-        // Validating as not empty, valid numeric value with range.
-        if (!_.isBoolean(query.isOneTime)) {
-            errorArray.push({
-                field: 'isOneTime',
-                error: 5010,
-                message: 'Please provide only valid \'isOneTime\' as boolean.'
-            })
-        }
-        validatedQuery.isOneTime = query.isOneTime
-    }
-
-    // is trail is optional, validating it as boolean
-    if (query.hasOwnProperty('isTrail')) {
-        query.isTrail = JSON.parse(query.isTrail);
-        if (!_.isBoolean(query.isTrail)) {
-            errorArray.push({
-            field: "isTrail",
-            error: 1009,
-            message: "'isTrail' is required as boolean",
-            });
-        }
-        validatedQuery.isTrail = query.isTrail
-    }
 
     // is active is optional, validating it as boolean
     if (query.hasOwnProperty('isActive')) {
@@ -194,7 +132,7 @@ const validateGetOrders = (req, res, done) => {
     }
 
     if (!_.isEmpty(errorArray)) {
-        return generalMiddleware.standardErrorResponse(res, errorArray, 'order.middleware.validateGetOrders')
+        return generalMiddleware.standardErrorResponse(res, errorArray, 'additionalOrder.middleware.validateGetOrders')
     }
 
     if (query.limit && query.limit > 0) {
@@ -280,121 +218,6 @@ const validateGetOrderById = (req, res, done) => {
     done()
 }
 
-///// validating update order
-const validateUpdateOrder = (req, res, done) => {
-    const body = req.body
-    let id = req.params.id
-
-    // get all the errors in an array
-    const errorArray = []
-    const validatedConditions = {}
-
-
-     // id is required, validating as not empty, valid numeric value with range.
-    if (!id || isNaN(id)) {
-        errorArray.push({
-        field: 'id',
-        error: 1132,
-        message: '\'id\' is required as numeric in params.'
-        })
-    }
-
-
-    // validFrom date is optional, validating it as not empty, valid number
-    if (body.hasOwnProperty('validFrom') && body.validFrom != ``) {
-        if (_.isEmpty(body.validFrom) || !_.isString(body.validFrom)) {
-            errorArray.push({
-            field: "validFrom",
-            error: 1009,
-            message: "'validFrom' is required as date",
-            });
-        }
-        validatedConditions.validFrom = body.validFrom;
-    }
-
-    // expiry date is optional, validating it as not empty, valid number
-    if (body.hasOwnProperty('expiryDate') && body.expiryDate != ``) {
-        if (_.isEmpty(body.expiryDate) || !_.isString(body.expiryDate)) {
-            errorArray.push({
-            field: "expiryDate",
-            error: 1009,
-            message: "'expiryDate' is required as string",
-            });
-        }
-        validatedConditions.expiryDate = body.expiryDate;
-    }
-
-    // price Is optional, validating as number
-    if (body.hasOwnProperty('overAllPrice') && body.overAllPrice) {
-        if (!(body.overAllPrice) || _.isNaN(body.overAllPrice)) {
-            errorArray.push({
-            field: 'overAllPrice',
-            error: 90220,
-            message: '\'overAllPrice\' is required as Numeric .'
-            })
-        }
-        validatedConditions.overAllPrice = body.overAllPrice;
-    }
-    
-
-     // order Is required, validating as array
-    if (!_.isArray(body.order)) {
-        errorArray.push({
-        field: 'order',
-        error: 90220,
-        message: '\'order\' is required as Array .'
-        })
-    }
-
-    // is one time is optional, validating it as boolean
-    if (body.hasOwnProperty('isOneTime')) {
-        if (!_.isBoolean(body.isOneTime)) {
-            errorArray.push({
-            field: "isOneTime",
-            error: 1009,
-            message: "'isOneTime' is required as boolean",
-            });
-        }
-        validatedConditions.isOneTime = body.isOneTime
-    }
-
-    // is trail is optional, validating it as boolean
-    if (body.hasOwnProperty('isTrail')) {
-        if (!_.isBoolean(body.isTrail)) {
-            errorArray.push({
-            field: "isTrail",
-            error: 1009,
-            message: "'isTrail' is required as boolean",
-            });
-        }
-        validatedConditions.isTrail = body.isTrail
-    }
-
-    // status is optional, validating it as boolean
-    if (body.hasOwnProperty('status')) {
-        if (!_.isString(body.status)) {
-            errorArray.push({
-            field: "status",
-            error: 1009,
-            message: "'status' is required as string",
-            });
-        }
-        validatedConditions.status = body.status
-    }
-
-    // send array if error(s)
-    if (errorArray.length) {
-        return generalMiddleware.standardErrorResponse(res, errorArray, 'order.middleware.validateUpdateOrder')
-    }
-
-    validatedConditions.order = body.order;
-    req.body = {
-        data: validatedConditions,
-        id: id
-    }
-    done()
-}
-
 const validateDeleteOrder = (req, res, done) => {
     const errorArray = []
     const params = req.params
@@ -416,7 +239,7 @@ const validateDeleteOrder = (req, res, done) => {
     }
   
     if (!_.isEmpty(errorArray)) {
-      return generalMiddleware.standardErrorResponse(res, errorArray, 'order.middleware.validateDeleteOrder')
+      return generalMiddleware.standardErrorResponse(res, errorArray, 'additionalOrder.middleware.validateDeleteOrder')
     }
     done()
 }
@@ -425,6 +248,5 @@ module.exports = {
     validateCreateOrder,
     validateGetOrders,
     validateGetOrderById,
-    validateUpdateOrder,
     validateDeleteOrder
 }

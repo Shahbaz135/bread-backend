@@ -11,7 +11,7 @@ async function createOrder(data) {
     if (!data.status) {
         data.status = `pending`;
     }
-    let newOrder = db.Order.build(data);
+    let newOrder = db.AdditionalOrder.build(data);
     return newOrder.save()
         .then(async order => {
             let orderDetails = data.order;
@@ -20,8 +20,8 @@ async function createOrder(data) {
             //// saving data to customer order
             if (orderDetails.length) {
                 for (let detail of orderDetails) {
-                    detail.OrderId = order.id;
-                    let customerOrder = db.CustomerOrder.build(detail)
+                    detail.AdditionalOrderId = order.id;
+                    let customerOrder = db.CustomerAdditionalOrder.build(detail)
                     await customerOrder.save();
                 }
             }
@@ -34,7 +34,7 @@ function getOrder(input) {
     let query = input;
     query.isDeleted = false;
   
-    return db.Order.findAll({ 
+    return db.AdditionalOrder.findAll({ 
         where: query,
         order: [
             ['createdAt', 'DESC'],
@@ -51,13 +51,13 @@ function getOrderById(input) {
     let query = input;
     query.isDeleted = false;
   
-    return db.Order.findOne({ 
+    return db.AdditionalOrder.findOne({ 
         where: query,
-        attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`],
+        attributes: [`id`, `validFrom`, `expiryDate`, `status`],
         include:
             [
                 {
-                    model: db.CustomerOrder,
+                    model: db.AdditionalCustomerOrder,
                     as: `OrderDetail`,
                     attributes: [`id`, `quantity`, `product`, `price`],
                     required: false,
@@ -88,7 +88,7 @@ function getOrderById(input) {
 
 ///// to change/update order
 const updateOrder = (data, id) => {
-    return db.Order.findOne({
+    return db.AdditionalOrder.findOne({
       where: {
         id: id,
         isDeleted: false
@@ -108,7 +108,7 @@ const updateOrder = (data, id) => {
         return order.save()
             .then(async detail => {
                 //// first deleting previous order details
-                await db.CustomerOrder.destroy({
+                await db.AdditionalCustomerOrder.destroy({
                     where: {
                         OrderId: id,
                         isDeleted: false
@@ -122,7 +122,7 @@ const updateOrder = (data, id) => {
                 if (orderDetails.length) {
                     for (let details of orderDetails) {
                         details.OrderId = id;
-                        let customerOrder = db.CustomerOrder.build(details)
+                        let customerOrder = db.AdditionalCustomerOrder.build(details)
                         await customerOrder.save();
                     }
                 }
@@ -133,7 +133,7 @@ const updateOrder = (data, id) => {
 
 //// to delete order
 const deleteOrder = (input) => {
-    return db.Order.findOne({
+    return db.AdditionalOrder.findOne({
       where: {
         id: input.id,
         isDeleted: false

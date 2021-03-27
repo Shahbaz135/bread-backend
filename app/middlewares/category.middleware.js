@@ -77,6 +77,38 @@ const validateGetAllCategories = (req, res, done) => {
     done()
 }
 
+///// validating get all categories by partner
+const validateGetCategoriesByArea = (req, res, done) => {
+  const errorArray = []
+  const query = req.query
+
+  // partnerId Is required, validating as number
+  if (!(query.partnerId) || _.isNaN(query.partnerId)) {
+      errorArray.push({
+      field: 'partnerId',
+      error: 90220,
+      message: '\'partnerId\' is required as Numeric .'
+      })
+  }
+
+  // day id Is required, validating as number
+  // if (!(query.dayId) || _.isNaN(query.dayId)) {
+  //   errorArray.push({
+  //   field: 'dayId',
+  //   error: 90220,
+  //   message: '\'dayId\' is required as Numeric .'
+  //   })
+  // }
+
+  // send array if error(s)
+  if (errorArray.length) {
+      return generalMiddleware.standardErrorResponse(res, errorArray, 'category.middleware.validateGetAllCategories')
+  }
+
+  req.conditions = query;
+  done()
+}
+
 ////// validating update category
 const validateUpdateCategory = (req, res, done) => {
     const errorArray = []
@@ -117,7 +149,8 @@ const validateUpdateCategory = (req, res, done) => {
 
 
 module.exports = {
-    validateAddCategory,
-    validateGetAllCategories,
-    validateUpdateCategory
+  validateAddCategory,
+  validateGetAllCategories,
+  validateUpdateCategory,
+  validateGetCategoriesByArea
 }

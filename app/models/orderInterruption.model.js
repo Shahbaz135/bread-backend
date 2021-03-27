@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = function (sequelize, DataTypes) {
-  let Order = sequelize.define('Order',
+  let OrderInterruption = sequelize.define('OrderInterruption',
     {
       validFrom: {
         type: DataTypes.DATEONLY,
@@ -11,15 +11,6 @@ module.exports = function (sequelize, DataTypes) {
       },
       status: {
         type: DataTypes.STRING
-      },
-      overAllPrice: {
-        type: DataTypes.FLOAT
-      },
-      isOneTime: {
-        type: DataTypes.BOOLEAN
-      },
-      isTrail: {
-      type: DataTypes.BOOLEAN
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -33,18 +24,18 @@ module.exports = function (sequelize, DataTypes) {
     ,
     {
       associate: function (models) {
-        Order.hasMany(models.CustomerOrder, { foreignKey: 'OrderId', as: 'OrderDetail' })
-        Order.belongsTo(models.Customer, {
-          as: 'CustomerOrders',
+        OrderInterruption.belongsTo(models.Order, { foreignKey: 'OrderId', as: 'InterruptionOrder' })
+        OrderInterruption.belongsTo(models.Customer, {
+          as: 'CustomerInterruption',
           foreignKey: 'CustomerId'
         })
-        Order.belongsTo(models.Partner, {
-            as: 'PartnerOrders',
+        OrderInterruption.belongsTo(models.Partner, {
+            as: 'PartnerInterruption',
             foreignKey: 'PartnerId'
           })
       }
     }
   )
 
-  return Order
+  return OrderInterruption
 }
