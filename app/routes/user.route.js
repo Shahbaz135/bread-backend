@@ -12,7 +12,7 @@ module.exports = function (app, apiVersion) {
   app.post(route + '/register-account', userMiddleware.validateSignUp, userController.signUp)
 
   // user login
-  app.post(route + '/login', userMiddleware.validateLoginCredentials, userController.login)
+  app.post(route + '/user/login', userMiddleware.validateLoginCredentials, userController.login)
 
   // verify account
   app.post(route + '/verify-otp', userMiddleware.verifyOtp, userController.verifyOtp)

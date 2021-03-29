@@ -5,10 +5,6 @@ let crypto = require('crypto')
 module.exports = function(sequelize, DataTypes) {
     let Customer = sequelize.define('Customer',
         {
-            salutation : {
-                type: DataTypes.STRING(100),
-                require: true
-            },
             fName : {
                 type: DataTypes.STRING(100),
                 require: true
@@ -83,7 +79,14 @@ module.exports = function(sequelize, DataTypes) {
                     as: 'PartnerCustomers',
                     foreignKey: 'PartnerId'
                 })
-                Customer.hasMany(models.Order, { foreignKey: 'CustomerId', as: 'CustomerOrders' })
+                Customer.hasMany(models.Order, { 
+                    foreignKey: 'CustomerId', 
+                    as: 'CustomerOrders' 
+                })
+                Customer.belongsTo(models.TourPlanning, {
+                    as: 'TourCustomer',
+                    foreignKey: 'TourPlanningId'
+                })
             }
         }
     )

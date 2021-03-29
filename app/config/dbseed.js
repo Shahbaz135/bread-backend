@@ -13,15 +13,17 @@ module.exports = function dbseed (db, sequelize) {
       let user = new db.User({
         fName: 'Muhammad',
         lName: 'Shahbaz',
-        phone: '03001231234',
-        language: 'eng',
-        RoleId: role.id
+        phone: '051456421',
+        mobileNumber: '03001231234',
+        email: `shahbaz@gmail.com`,
+        postalCode: 12345
       })
 
       user.salt = user.makeSalt()
-      user.hashedPassword = user.encryptPassword('zaqoota', user.salt)
+      user.password = user.encryptPassword('123', user.salt)
       user.save()
     })
+
 
   // Inserting week days
   db.WeekDays.bulkCreate([{

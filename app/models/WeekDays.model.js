@@ -35,17 +35,23 @@ module.exports = function (sequelize, DataTypes) {
           through: 'RegularDeliveryDays',
           as: 'regularDeliveryDay',
           foreignKey: 'WeekDaysId'
-      })
+        })
 
-      WeekDays.belongsToMany(models.DeliveryArea, {
-        through: 'SampleDeliveryDays',
-        as: 'sampleDeliveryDay',
-        foreignKey: 'WeekDaysId'
-    })
+        WeekDays.belongsToMany(models.DeliveryArea, {
+          through: 'SampleDeliveryDays',
+          as: 'sampleDeliveryDay',
+          foreignKey: 'WeekDaysId'
+        })
 
         WeekDays.hasMany(models.CustomerOrder, {
           foreignKey: 'WeekDaysId', as: 'OrderDay' 
         })
+
+        WeekDays.belongsToMany(models.TourPlanning, {
+          through: 'TourDays',
+          as: 'tourDays',
+          foreignKey: 'WeekDaysId'
+      })
       }
     }
   )

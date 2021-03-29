@@ -70,6 +70,30 @@ module.exports = function(sequelize, DataTypes) {
                     foreignKey: 'PartnerId',
                     as: 'PartnerOrders'
                 })
+                Partner.hasMany(models.Bakery, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerBakery'
+                })
+                Partner.hasMany(models.DeliveryCharges, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerDeliveryCharges'
+                })
+                Partner.hasMany(models.UserBankDetails, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerBankDetails'
+                })
+                Partner.hasMany(models.UserBillingDetails, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerBillingDetails'
+                })
+                Partner.hasMany(models.UserPaymentOptions, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerPaymentOption'
+                })
+                Partner.hasMany(models.TourPlanning, { 
+                    foreignKey: 'PartnerId',
+                    as: 'CreatedByPartner'
+                })
             }
         }
     )

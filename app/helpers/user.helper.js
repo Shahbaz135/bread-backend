@@ -9,26 +9,23 @@ const _ = require('lodash')
 function signUp (input) {
   
   let userObj = {
-    Name: input.Name,
+    fName: input.fName,
+    lName: input.lName,
     email: input.email,
+    mobileNumber: input.mobileNumber,
+    postalCode: input.postalCode,
+    houseStreetNumber: input.houseStreetNumber,
+    town: input.town,
     // otp: Math.round(Math.random() * 9000 + 1000),
     // otpValidTill: now,
     phone: input.phone,
-    landphone: input.landphone || ` `,
-    country: input.country,
-    city: input.city,
-    // user_type = input.user_type,
-    RoleId: 1
+    // RoleId: 1
   }
-
-  console.log('userObj.phone', userObj.phone.toString)
 
   // check if input phone already exist
   return db.User.findOne({ where: { phone: userObj.phone } })
     // execute all these functions
     .then(async (user) => {
-      console.log('user', user)
-
       const errorsArray = []
       // check user existence
       if (user) {
@@ -51,72 +48,81 @@ function signUp (input) {
         }
       }
 
+      if (userObj.mobileNumber) {
+        if (db.User.findOne({ mobileNumber: userObj.mobileNumber })) {
+          // user email already exist.
+          errorsArray.push({
+            field: 'email',
+            error: 1505,
+            message: 'mobile number already exist'
+          })
+        }
+      }
+
       if (!_.isEmpty(errorsArray)) {
         return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
       }
 
       let newUser = db.User.build(userObj)
       newUser.salt = newUser.makeSalt()
-      newUser.hashedPassword = newUser.encryptPassword(input.password, newUser.salt)
+      newUser.password = newUser.encryptPassword(input.password, newUser.salt)
       await newUser.save()
+
       return {
         id: newUser.id,
-        Name: newUser.Name,
+        fName: newUser.fName,
+        lName: newUser.lName,
         email: newUser.email,
         phone: newUser.phone,
-        RoleId: newUser.RoleId,
-        landphone: newUser.landphone,
-        country: newUser.country,
-        city: newUser.city,
-        // user_type = newUser.user_type,
-        // isVerified: newUser.isVerified,
-        // isBlocked: newUser.isBlocked,
       }
     })
 }
 
 // user Login
 function login (input) {
-  let phone = input.phone
+  let email = input.email
   let password = input.password
   let userData = {}
 
   // check if phone exist and isDeleted equal to false
-  return db.User.findOne({ where: { phone: phone, isDeleted: false } })
+  return db.User.findOne({ where: { email: email, isDeleted: false } })
     .then((user) => {
-      if (!user || !user.salt || !user.hashedPassword) {
+      if (!user || !user.salt || !user.password) {
         // user not found, throw error
         return generalHelpingMethods.rejectPromise([{
           field: 'phone',
           error: 1540,
-          message: 'Invalid phone or Password'
+          message: 'Invalid Email or Password'
         }])
       } else if (!user.authenticate(password)) {
         // user not authenticated, throw error
         return generalHelpingMethods.rejectPromise([{
-          field: 'phone',
+          field: 'email',
           error: 1543,
-          message: 'Invalid phone or Password'
+          message: 'Invalid Email or Password'
         }])
       } else {
         // convert mongoose document object to plain json object and return user
+        
         return user.toJSON()
       }
     })
     .then((user) => {
+     
       userData.userInfo = user
-      return db.Role.findOne({ id: user.RoleId, isDeleted: false, isActive: true })
+      return
+      // return db.Role.findOne({ id: user.RoleId, isDeleted: false, isActive: true })
     })
     .then((role) => {
-      if (!role) {
-        // Active and not deleted role not found, throw error
-        return generalHelpingMethods.rejectPromise([{
-          field: 'Role',
-          error: 1546,
-          message: 'Role is not defined'
-        }])
-      }
-      userData.userInfo.role = role.name
+      // if (!role) {
+      //   // Active and not deleted role not found, throw error
+      //   return generalHelpingMethods.rejectPromise([{
+      //     field: 'Role',
+      //     error: 1546,
+      //     message: 'Role is not defined'
+      //   }])
+      // }
+      // userData.userInfo.role = role.name
       // userData.userInfo.permissions = role.permissions
 
       const tokenData = {
@@ -125,14 +131,13 @@ function login (input) {
         lName: userData.userInfo.lName,
         email: userData.userInfo.email,
         phone: userData.userInfo.phone,
-        RoleId: userData.userInfo.RoleId,
-        role: role.name
+        // RoleId: userData.userInfo.RoleId,
+        // role: role.name
       }
 
       userData.userInfo = { ...tokenData,
         isVerified: userData.userInfo.isVerified,
         isBlocked: userData.userInfo.isBlocked,
-        language: userData.userInfo.language
       }
 
       return helpingHelperMethods.signLoginData({ data: tokenData })

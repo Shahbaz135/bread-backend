@@ -19,12 +19,21 @@ const validateSignUp = (req, res, done) => {
     }
   
 
-  // Name is required, validating it as not empty, valid String and length range.
-  if (_.isEmpty(body.Name) || !_.isString(bodyName) || body.Name.length < 2 || body.Name.length > 100) {
+  // fName is required, validating it as not empty, valid String and length range.
+  if (_.isEmpty(body.fName) || !_.isString(bodyfName) || body.fName.length < 2 || body.fName.length > 100) {
     errorArray.push({
-      field: 'Name',
+      field: 'fName',
       error: 1000,
-      message: '\'Name\' is required as string, length must be between 2 and 100.'
+      message: '\'fName\' is required as string, length must be between 2 and 100.'
+    })
+  }
+
+  // lName is required, validating it as not empty, valid String and length range.
+  if (_.isEmpty(body.lName) || !_.isString(body.lName) || body.lName.length < 2 || body.lName.length > 100) {
+    errorArray.push({
+      field: 'lName',
+      error: 1000,
+      message: '\'lName\' is required as string, length must be between 2 and 100.'
     })
   }
 
@@ -37,77 +46,14 @@ const validateSignUp = (req, res, done) => {
     })
   }
 
-
-  //confirom password is required, validating it as not empty, valid String and length range and equal to orignal password.
-  if (_.isEmpty(body.confirmpassword) || !_.isString(body.confirmpassword) || body.confirmpassword.length < 8 || body.confirmpassword.length > 16 || body.password != body.confirmpassword) {
-    errorArray.push({
-      field: 'confirmpassword',
-      error: 1015,
-      message: '\'confirmpassword\' is not equal.'
-    })
-  }
-
-
    // phone is required, validating it as not empty, valid String and length range.
-   if (_.isEmpty(body.phone) || !_.isString(body.phone) || body.phone.length < 11 || body.phone.length > 11) {
-    errorArray.push({
-      field: 'phone',
-      error: 1009,
-      message: '\'phone\' is required as string, length must be 11.'
-    })
-  }
-
-  // landphone is an optional string property, if it is given than validate it.
-  if (body.hasOwnProperty('landphone') && body.landphone != '') {
-    // Validating as not empty, valid String and length range.
-    if (_.isEmpty(body.landphone) || !_.isString(body.landphone) || body.landphone.length < 11 || body.landphone.length > 11) {
-      errorArray.push({
-        field: 'landphone',
-        error: 1009,
-        message: '\'landphone\' is required as string, length must be 11.'
-      })
-    }
-  }
-
-   // country is required, validating it as not empty.
-  if (_.isEmpty(body.country) || !_.isString(body.country) ) {
-    errorArray.push({
-      field: 'country',
-      error: 1012,
-      message: '\'country\' is required as string'
-    })
-  }
-
-
-   // city is required, validating it as not empty.
-   if (_.isEmpty(body.city) || !_.isString(body.city) ) {
-    errorArray.push({
-      field: 'city',
-      error: 1012,
-      message: '\'city\' is required as string'
-    })
-  }
-
-
-   // user_type is required, validating it as not empty.
-   if (_.isEmpty(body.user_type) || !_.isString(body.user_type) ) {
-    errorArray.push({
-      field: 'user_type',
-      error: 1012,
-      message: '\'user_type\' is required as string'
-    })
-  }
-
-
-   // term_check is required, validating it as not empty.
-   if (_.isEmpty(body.term_check) || !_.isString(body.term_check) ) {
-    errorArray.push({
-      field: 'term_check',
-      error: 1012,
-      message: '\'term_check\' is required '
-    })
-  }
-
+  // if (_.isEmpty(body.phone) || !_.isString(body.phone) || body.phone.length < 11 || body.phone.length > 11) {
+  //   errorArray.push({
+  //     field: 'phone',
+  //     error: 1009,
+  //     message: '\'phone\' is required as string, length must be 11.'
+  //   })
+  // }
 
   // send array if error(s)
   if (errorArray.length) {
@@ -123,12 +69,12 @@ const validateLoginCredentials = (req, res, done) => {
   // get all the errors in an array
   const errorArray = []
 
-  // phone is required, validating it as not empty, valid String and length range.
-  if (_.isEmpty(body.phone) || !_.isString(body.phone) || body.phone.length < 11 || body.phone.length > 11) {
+  //email is an required  Validating as not empty, valid String and length range.
+  if (!_.isString(body.email) || body.email.length < 5 || body.email.length > 100 || !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(body.email))) {
     errorArray.push({
-      field: 'phone',
-      error: 1030,
-      message: '\'phone\' is required as string, length must be 11.'
+      field: 'email',
+      error: 1006,
+      message: 'Please provide only valid \'email\' as string, length must be between 5 and 100.'
     })
   }
 
