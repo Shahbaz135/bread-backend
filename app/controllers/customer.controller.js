@@ -73,6 +73,19 @@ const changePassword = function (req, res) {
     })
 }
 
+// Create New Partner
+const createCustomer = function (req, res) {
+    return customerHelper.createCustomer(req.body)
+        .then((data) => {
+            generalController.successResponse(res, 'Customer Created successfully.', data, 'customer.controller.createCustomer')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'customer.controller.createCustomer', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.createCustomer', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+
 
 module.exports = {
     register,
@@ -80,7 +93,8 @@ module.exports = {
     updateCustomer,
     getCustomerById,
     checkPassword,
-    changePassword
+    changePassword,
+    createCustomer
     // getPartnerByPostalCode,
     // getAllPartners
   }

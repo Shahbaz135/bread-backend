@@ -22,6 +22,9 @@ module.exports = function (app, apiVersion) {
 
     app.post(route + '/customer/changePassword', customerMiddleware.validateChangePassword, customerController.changePassword)
 
+    // new partner registration
+    app.post(route + '/customer/create', customerMiddleware.validateCreateCustomer, customerController.createCustomer)
+
     // app.get(route + '/getAllPartners', partnerMiddleware.validateGetAllPartners, partnerController.getAllPartners)
 
 

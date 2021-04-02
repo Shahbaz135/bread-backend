@@ -9,19 +9,14 @@ const helpingHelperMethods = require('./helping.helper')
 
 //// Partner registration
 function registration(input, file) {
-  let userObj = {
-    name: input.name,
-    email: input.email,
-    phone: input.phone,
-    houseStreetNumber: input.houseStreetNumber,
-    town: input.town,
-    iban: input.iban,
-    postalCode: input.postalCode,
-    image: `images/` + file.filename
+  let userObj = input;
+
+  if (file) {
+    userObj.image = `images/` + file.filename
   }
         
   // check if input phone already exist
-  return db.Partner.findOne({ where: { phone: userObj.phone } })
+  return db.Partner.findOne({ where: { email: userObj.email } })
   // execute all these functions
   .then(async (user) => {
     const errorsArray = []
@@ -29,20 +24,20 @@ function registration(input, file) {
     if (user) {
       // user phone already exist.
       errorsArray.push({
-          field: 'phone',
+          field: 'email',
           error: 1500,
-          message: 'phone already exist'
+          message: 'Franchise already exist with this email'
       })
     }
 
-    await db.Partner.findOne({ where: { email: userObj.email}})
+    await db.Partner.findOne({ where: { postalCode: userObj.postalCode}})
     .then(partner => {
       if (partner) {
         // user email already exist.
         errorsArray.push({
-          field: 'email',
+          field: 'Postal Code',
           error: 1505,
-          message: 'email already exist'
+          message: 'Franchise already exist with this Postal Code'
         })
       }
     })
@@ -129,7 +124,10 @@ function getPartnerByPostalCode(input) {
   query.isDeleted = false;
   query.isActive = true;
 
-  return db.Partner.findOne({ where: query })
+  return db.Partner.findOne({ 
+    where: query,
+    attributes: { exclude: ['password', 'salt']}
+   })
     .then((partner) => {
       if (!partner) {
         // user not found, throw error
@@ -140,22 +138,8 @@ function getPartnerByPostalCode(input) {
         }])
       } else {
         // convert mongoose document object to plain json object and return user
-        return partner.toJSON()
+        return partner
       }
-    })
-    .then((partner) => {
-      const partnerData = {
-        id: partner.id,
-        name: partner.name,
-        email: partner.email,
-        image: partner.image,
-        phone: partner.phone,
-        postalCode: partner.postalCode,
-        houseStreetNumber: partner.houseStreetNumber,
-        town: partner.town
-      }
-     
-      return partnerData;
     })
 }
 
@@ -165,13 +149,40 @@ function getAllPartners(input) {
 
   return db.Partner.findAll({
     where: query,
+    order: [
+      ['createdAt', 'ASC'],
+    ], 
     attributes: { exclude: ['password', 'salt'] }
   })
+}
+
+//// to edit partners
+function updatePartner(data, id) {
+  return db.Partner.findOne({
+    where: {
+      id: id,
+      isDeleted: false
+    }
+  })
+    .then((partner) => {
+      if (_.isEmpty(partner)) {
+        // Product not found, return error
+        return generalHelpingMethods.rejectPromise([{
+        field: 'id',
+        error: 1572,
+        message: 'Partner not found.'
+        }])
+      }
+      // Update partner
+      partner.set(data);
+      return partner.save();
+    })
 }
 
 module.exports = {
   registration,
   login,
   getPartnerByPostalCode,
-  getAllPartners
+  getAllPartners,
+  updatePartner
 }

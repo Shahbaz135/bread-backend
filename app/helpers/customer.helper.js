@@ -294,6 +294,53 @@ const changePassword = (data) => {
     })
 }
 
+//// Customer registration
+function createCustomer(input) {
+  const userObj = input;
+          
+  // check if input phone already exist
+  return db.Customer.findOne({ where: { phone: userObj.phone } })
+  // execute all these functions
+  .then(async (user) => {
+    const errorsArray = []
+    // check user existence
+    if (user) {
+      // user phone already exist.
+      errorsArray.push({
+          field: 'phone',
+          error: 1500,
+          message: 'phone already exist'
+      })
+    }
+
+    await db.Customer.findOne({ where: { email: userObj.email}})
+    .then(partner => {
+      if (partner) {
+        // user email already exist.
+        errorsArray.push({
+          field: 'email',
+          error: 1505,
+          message: 'email already exist'
+        })
+      }
+    })
+    
+    if (!_.isEmpty(errorsArray)) {
+      return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
+    }
+    
+    let newCustomer = db.Customer.build(userObj);
+    await newCustomer.save()
+
+    return {
+      id: newCustomer.id,
+      name: newCustomer.name,
+      email: newCustomer.email,
+      phone: newCustomer.phone,
+    }
+  })
+}
+
 
 module.exports = {
     registration,
@@ -301,7 +348,8 @@ module.exports = {
     updateCustomer,
     getCustomerById,
     changePassword,
-    checkPassword
+    checkPassword,
+    createCustomer
     // getPartnerByPostalCode,
     // getAllPartners
   }

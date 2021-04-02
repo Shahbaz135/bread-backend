@@ -18,12 +18,9 @@ module.exports = function(sequelize, DataTypes) {
             salt: DataTypes.STRING,
             image: {
                 type: DataTypes.STRING(100),
-                require: true
             },
             phone: {
                 type: DataTypes.STRING(15),
-                require: true,
-                unique: true
             },
             postalCode: {
                 type: DataTypes.INTEGER,
@@ -39,6 +36,25 @@ module.exports = function(sequelize, DataTypes) {
             iban: {
                 type: DataTypes.STRING,
                 require: true
+            },
+            isName: {
+                type: DataTypes.BOOLEAN,
+            },
+            isEmail: {
+                type: DataTypes.BOOLEAN,
+            },
+            isPassword: DataTypes.BOOLEAN,
+            isPostalCode: {
+                type: DataTypes.BOOLEAN,
+            },
+            isHouseStreetNumber: {
+                type: DataTypes.BOOLEAN,
+            },
+            isTown: {
+                type: DataTypes.BOOLEAN
+            },
+            isIban: {
+                type: DataTypes.BOOLEAN,
             },
             isVerified: {
                 type: DataTypes.BOOLEAN,

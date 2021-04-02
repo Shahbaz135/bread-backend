@@ -8,7 +8,7 @@ const generalController = require('./general.controller')
 const register = function (req, res) {
     return partnerHelper.registration(req.body, req.file)
       .then((data) => {
-        generalController.successResponse(res, 'Partner Register successfully.', data, 'partner.controller.register')
+        generalController.successResponse(res, 'Franchise Registered successfully.', data, 'partner.controller.register')
       }).catch(StandardError, (err) => {
         generalController.errorResponse(res, err, null, 'partner.controller.register', SERVER_RESPONSE.VALIDATION_ERROR)
       }).catch((err) => {
@@ -49,9 +49,22 @@ const getAllPartners = function (req, res) {
     })
 }
 
+// To update order
+const updatePartner = function (req, res) {
+  return partnerHelper.updatePartner(req.body.data, req.body.id)
+    .then((data) => {
+        generalController.successResponse(res, 'Partner Updated successfully.', data, 'partner.controller. updatePartner')
+    }).catch(StandardError, (err) => {
+        generalController.errorResponse(res, err, null, 'partner.controller. updatePartner', SERVER_RESPONSE.VALIDATION_ERROR)
+    }).catch((err) => {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'partner.controller. updatePartner', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
 module.exports = {
   register,
   login,
   getPartnerByPostalCode,
-  getAllPartners
+  getAllPartners,
+  updatePartner
 }

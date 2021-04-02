@@ -233,6 +233,180 @@ const validateRegistration = (req, res, done) => {
   done();
 };
 
+//// when customer created ny admin
+const validateCreateCustomer = (req, res, done) => {
+    const body = req.body;
+    // get all the errors in an array
+    const errorArray = [];
+
+
+    //email is an required  Validating as not empty, valid String and length range.
+    if (
+        !_.isString(body.email) ||
+        body.email.length < 5 ||
+        body.email.length > 100 ||
+        !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(body.email)
+    ) {
+        errorArray.push({
+        field: "email",
+        error: 1006,
+        message:
+            "Please provide only valid 'email' as string, length must be between 5 and 100.",
+        });
+    }
+
+    // salutation Name is required, validating it as not empty, valid String and length range.
+    if (
+        _.isEmpty(body.fName) ||
+        !_.isString(body.fName) ||
+        body.fName.length < 2 ||
+        body.fName.length > 100
+    ) {
+        errorArray.push({
+        field: "first name",
+        error: 1000,
+        message:
+            "'first name' is required as string, length must be between 2 and 100.",
+        });
+    }
+
+    // Salutation is optional, validating it as not empty, valid String and length range.
+    if (body.hasOwnProperty('salutation') && body.salutation != ``) {
+        if (
+            _.isEmpty(body.salutation) ||
+            !_.isString(body.salutation) ||
+            body.salutation.length < 1 ||
+            body.salutation.length > 10
+        ) {
+            errorArray.push({
+            field: "salutation",
+            error: 1000,
+            message:
+                "'salutation' is required as string, length must be between 2 and 10.",
+            });
+        }
+    }
+
+    // Last Name is required, validating it as not empty, valid String and length range.
+    if (
+        _.isEmpty(body.lName) ||
+        !_.isString(body.lName) ||
+        body.lName.length < 2 ||
+        body.lName.length > 100
+    ) {
+        errorArray.push({
+        field: "last name",
+        error: 1000,
+        message:
+            "'last name' is required as string, length must be between 2 and 100.",
+        });
+    }
+
+    // phone is required, validating it as not empty, valid String and length range.
+    if (
+        _.isEmpty(body.phone) ||
+        !_.isString(body.phone) ||
+        body.phone.length < 11 ||
+        body.phone.length > 11
+    ) {
+        errorArray.push({
+        field: "phone",
+        error: 1009,
+        message: "'phone' is required as string, length must be 11.",
+        });
+    }
+
+    // postal code is optional, validating it as not empty, valid number
+    if (body.hasOwnProperty('postalCode') && body.postalCode != ``) {
+        if (_.isEmpty(body.postalCode) || !_.isString(body.postalCode)) {
+            errorArray.push({
+            field: "postalCode",
+            error: 1009,
+            message: "'postalCode' is required",
+            });
+        }
+    }
+    
+
+    // House and Street number is required, validating it as not empty, valid String.
+    if (
+        _.isEmpty(body.houseStreetNumber) ||
+        !_.isString(body.houseStreetNumber)
+    ) {
+        errorArray.push({
+        field: "houseStreetNumber",
+        error: 1009,
+        message: "'houseStreetNumber' is required as string, length must be 11.",
+        });
+    }
+
+    // Town is an optional string property, if it is given than validate it.
+    if (body.hasOwnProperty('town') && body.town != ``) {
+        if (_.isEmpty(body.town) || !_.isString(body.town)) {
+            errorArray.push({
+            field: "town",
+            error: 1009,
+            message: "'town' is required as string, length must be 11.",
+            });
+        }
+    }
+
+
+    // IBAN is optional if given, validating it as not empty, valid String.
+    if (body.hasOwnProperty('iban') && body.iban != ``) {
+        if (_.isEmpty(body.iban) || !_.isString(body.iban)) {
+            errorArray.push({
+            field: "iban",
+            error: 1009,
+            message: "'iban' is required as string",
+            });
+        }
+    }
+
+    // company is optional if given, validating it as not empty, valid String.
+    if (body.hasOwnProperty('company') && body.company != ``) {
+        if (_.isEmpty(body.company) || !_.isString(body.company)) {
+            errorArray.push({
+            field: "company",
+            error: 1009,
+            message: "'company' is required as string",
+            });
+        }
+    }
+
+    // delivery notes is optional if given, validating it as not empty, valid String.
+    if (body.hasOwnProperty('deliverNotes') && body.deliverNotes != ``) {
+        if (_.isEmpty(body.deliverNotes) || !_.isString(body.deliverNotes)) {
+            errorArray.push({
+            field: "deliverNotes",
+            error: 1009,
+            message: "'deliverNotes' is required as string",
+            });
+        }
+    }
+
+    // partner id is required, validating as not empty, valid numeric value with range.
+    if (!body.partnerId || isNaN(body.partnerId)) {
+        errorArray.push({
+        field: 'partnerId',
+        error: 90071,
+        message: '\'partnerId\' is required as numeric.'
+        })
+    }
+    
+
+  // send array if error(s)
+  if (errorArray.length) {
+    return generalMiddleware.standardErrorResponse(
+      res,
+      errorArray,
+      "customer.middleware.validateCreateCustomer"
+    );
+  }
+
+  req.body = body;
+  done();
+}
 
 ///// validating login credentials
 const validateLoginCredentials = (req, res, done) => {
@@ -622,5 +796,6 @@ module.exports = {
     validateGetCustomers,
     validateUpdateCustomer,
     validateGetCustomerById,
-    validateChangePassword
+    validateChangePassword,
+    validateCreateCustomer
 }

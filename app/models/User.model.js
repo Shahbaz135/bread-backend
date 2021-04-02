@@ -112,7 +112,7 @@ module.exports = function (sequelize, DataTypes) {
   }
 
   User.prototype.authenticate = function (plainText) {
-    return this.encryptPassword(plainText, this.salt).toString() === this.hashedPassword.toString()
+    return this.encryptPassword(plainText, this.salt).toString() === this.password.toString()
   }
 
   User.prototype.encryptPassword = function (password, salt) {

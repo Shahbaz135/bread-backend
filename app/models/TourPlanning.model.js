@@ -17,7 +17,7 @@ module.exports = function (sequelize, DataTypes) {
         billingMode: {
             type: DataTypes.STRING(100)
         },
-        receptionTour: {
+        fieldTour: {
             type: DataTypes.BOOLEAN,
         },
         supportTour: {

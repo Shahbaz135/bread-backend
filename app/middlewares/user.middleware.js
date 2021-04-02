@@ -167,19 +167,6 @@ const validateGetUsers = (req, res, done) => {
     validatedQuery.phone = query.phone
   }
 
-  // language is an optional string property, if it is given than validate it.
-  if (query.hasOwnProperty('language')) {
-    // language is required, validating it as not empty, valid String and length range.
-    if (_.isEmpty(query.language) || !_.isString(query.language) || (query.language != 'eng' && query.language != 'urd')) {
-      errorArray.push({
-        field: 'language',
-        error: 1065,
-        message: '\'language\' is required as string, must be eng/urd.'
-      })
-    }
-    validatedQuery.language = query.language
-  }
-
   // isVerified is an optional string property, if it is given than validate it.
   if (query.hasOwnProperty('isVerified')) {
     // Validating as not empty, valid String and length range.
@@ -197,22 +184,22 @@ const validateGetUsers = (req, res, done) => {
     }
   }
 
-  // isBlocked is an optional string property, if it is given than validate it.
-  if (query.hasOwnProperty('isBlocked')) {
-    // Validating as not empty, valid String and length range.
-    if (!query.isBlocked || (query.isBlocked != 'true' && query.isBlocked != 'false')) {
-      errorArray.push({
-        field: 'isBlocked ',
-        error: 1071,
-        message: 'Please provide only valid \'isBlocked \' as boolean.'
-      })
-    }
-    try {
-      validatedQuery.isBlocked = JSON.parse(query.isBlocked)
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  // // isBlocked is an optional string property, if it is given than validate it.
+  // if (query.hasOwnProperty('isBlocked')) {
+  //   // Validating as not empty, valid String and length range.
+  //   if (!query.isBlocked || (query.isBlocked != 'true' && query.isBlocked != 'false')) {
+  //     errorArray.push({
+  //       field: 'isBlocked ',
+  //       error: 1071,
+  //       message: 'Please provide only valid \'isBlocked \' as boolean.'
+  //     })
+  //   }
+  //   try {
+  //     validatedQuery.isBlocked = JSON.parse(query.isBlocked)
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
 
   if (!_.isEmpty(errorArray)) {
     return generalMiddleware.standardErrorResponse(res, errorArray, 'user.middleware.validateGetUsers')
