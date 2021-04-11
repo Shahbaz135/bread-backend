@@ -29,7 +29,7 @@ const searchProducts = function (req, res) {
 }
 
 const updateProduct = function (req, res) {
-  return productHelper.updateProduct(req.body.data, req.body.id)
+  return productHelper.updateProduct(req.body.data, req.file, req.body.id)
     .then(function (data) {
       generalController.successResponse(res, 'Successfully update the product info', data, 'product.controller.updateProduct')
     }).catch(StandardError, function (err) {

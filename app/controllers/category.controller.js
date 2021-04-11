@@ -18,8 +18,20 @@ const createCategory = function (req, res) {
 }
 
 // Get all categories of partner
-const getAllCategories = function (req, res) {
+const getCategoriesByDay = function (req, res) {
     return categoryHelper.AllCategoriesByDay(req.conditions)
+        .then((data) => {
+            generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.getCategoriesByDay')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'category.controller.getCategoriesByDay', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.getCategoriesByDay', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+// Get all categories of partner
+const getAllCategories = function (req, res) {
+    return categoryHelper.getAllCategories(req.conditions)
         .then((data) => {
             generalController.successResponse(res, 'Category fetched successfully.', data, 'category.controller.getAllCategories')
         }).catch(StandardError, (err) => {
@@ -45,7 +57,7 @@ const getCategoriesByAreaRegular = function (req, res) {
 const updateCategories = function (req, res) {
     return categoryHelper.editCategory(req.conditions.data, req.conditions.id)
         .then((data) => {
-            generalController.successResponse(res, 'Category updated successfully.', data, 'category.controller.register')
+            generalController.successResponse(res, 'Category updated successfully.', data, 'category.controller.updateCategories')
         }).catch(StandardError, (err) => {
             generalController.errorResponse(res, err, null, 'category.controller.updateCategories', SERVER_RESPONSE.VALIDATION_ERROR)
         }).catch((err) => {
@@ -53,10 +65,24 @@ const updateCategories = function (req, res) {
         })
 }
 
+// to delete the categories
+const deleteCategory = function (req, res) {
+    return categoryHelper.deleteCategory(req.params)
+        .then((data) => {
+            generalController.successResponse(res, 'Category deleted successfully.', data, 'category.controller.deleteCategory')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'category.controller.deleteCategory', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'category.controller.deleteCategory', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
 
 module.exports = {
     createCategory,
     getAllCategories,
+    getCategoriesByDay,
     updateCategories,
-    getCategoriesByAreaRegular
+    getCategoriesByAreaRegular,
+    deleteCategory
 }

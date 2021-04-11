@@ -85,6 +85,28 @@ const createCustomer = function (req, res) {
         })
 }
 
+const getAllCustomers = function (req, res) {
+    return customerHelper.getAllCustomers(req.conditions)
+        .then(function (data) {
+        generalController.successResponse(res, 'Successfully fetched customers', data, 'customer.controller.getAllCustomers')
+        }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'customer.controller.getAllCustomers', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.getAllCustomers', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
+const deleteCustomer = function (req, res) {
+    return customerHelper.deleteCustomer(req.params)
+        .then(function (data) {
+        generalController.successResponse(res, 'Successfully deleted customer', data, 'customer.controller.deleteCustomer')
+        }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'customer.controller.deleteCustomer', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.deleteCustomer', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+    })
+}
+
 
 
 module.exports = {
@@ -94,7 +116,9 @@ module.exports = {
     getCustomerById,
     checkPassword,
     changePassword,
-    createCustomer
+    createCustomer,
+    getAllCustomers,
+    deleteCustomer
     // getPartnerByPostalCode,
     // getAllPartners
   }

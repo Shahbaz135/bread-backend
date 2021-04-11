@@ -24,6 +24,10 @@ module.exports = function (sequelize, DataTypes) {
           as: 'PartnerCategory',
           foreignKey: 'PartnerId'
         })
+        Category.belongsTo(models.User, {
+          as: 'UserCategory',
+          foreignKey: 'UserId'
+        })
         Category.belongsToMany(models.WeekDays, {
           through: 'CategoryDay',
           as: 'categoryDays',

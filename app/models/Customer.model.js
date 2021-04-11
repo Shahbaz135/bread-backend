@@ -145,6 +145,10 @@ module.exports = function(sequelize, DataTypes) {
                 type: DataTypes.BOOLEAN,
                 require: true
             },
+            isArchive: {
+                type: DataTypes.BOOLEAN,
+                require: false
+            },
             isDifferentDeliveryFee: {
                 type: DataTypes.BOOLEAN,
             },
@@ -176,10 +180,14 @@ module.exports = function(sequelize, DataTypes) {
                     foreignKey: 'CustomerId', 
                     as: 'CustomerOrders' 
                 })
-                // Customer.belongsTo(models.TourPlanning, {
-                //     as: 'TourCustomer',
-                //     foreignKey: 'TourPlanningId'
-                // })
+                Customer.belongsTo(models.User, {
+                    as: 'UserCustomer',
+                    foreignKey: 'UserId'
+                })
+                Customer.belongsTo(models.DeliveryArea, {
+                    as: 'DeliveryAreaCustomer',
+                    foreignKey: 'DeliveryAreaId'
+                })
             }
         }
     )

@@ -8,14 +8,17 @@ module.exports = function (app, apiVersion) {
     const route = apiVersion
 
     // create new category
-    app.post(route + '/category/add'  , categoryMiddleware.validateAddCategory, categoryController.createCategory)
+    app.post(route + '/category/add', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateAddCategory, categoryController.createCategory)
+
+    app.get(route + '/category/getByPartner', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateGetAllCategories, categoryController.getCategoriesByDay)
+
+    app.get(route + '/category/getAll', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateGetAllCategories, categoryController.getAllCategories)
+
+    app.get(route + '/category/getByAreaRegular', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateGetCategoriesByArea, categoryController.getCategoriesByAreaRegular)
 
 
-    app.get(route + '/category/getByPartner', categoryMiddleware.validateGetAllCategories, categoryController.getAllCategories)
+    app.put(route + '/category/update/:id', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateUpdateCategory, categoryController.updateCategories)
 
-    app.get(route + '/category/getByAreaRegular', categoryMiddleware.validateGetCategoriesByArea, categoryController.getCategoriesByAreaRegular)
-
-
-    app.put(route + '/category/update/:id', categoryMiddleware.validateUpdateCategory, categoryController.updateCategories)
+    app.delete(route + '/category/delete/:id', passport.authenticate('jwt', { session: false }), categoryMiddleware.validateDeleteCategory, categoryController.deleteCategory)
 
 }

@@ -38,7 +38,7 @@ const validateSignUp = (req, res, done) => {
   }
 
    // password is required, validating it as not empty, valid String and length range.
-   if (_.isEmpty(body.password) || !_.isString(body.password) || body.password.length < 8 || body.password.length > 16) {
+  if (_.isEmpty(body.password) || !_.isString(body.password) || body.password.length < 8 || body.password.length > 16) {
     errorArray.push({
       field: 'password',
       error: 1015,

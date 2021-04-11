@@ -9,15 +9,15 @@ module.exports = function (app, apiVersion) {
   const route = apiVersion
 
   // add product
-  app.post(route + '/products/add', uploadProductImage.single(`image`), productMiddleware.validateAddProduct, productController.addProduct)
+  app.post(route + '/products/add', passport.authenticate('jwt', { session: false }), uploadProductImage.single(`image`), productMiddleware.validateAddProduct, productController.addProduct)
 
   // search product
-  app.get(route + '/products/search', productMiddleware.validateSearchProducts, productController.searchProducts)
+  app.get(route + '/products/list', passport.authenticate('jwt', { session: false }), productMiddleware.validateSearchProducts, productController.searchProducts)
 
   // update product
-  app.put(route + '/product/:id', passport.authenticate('jwt', { session: false }), productMiddleware.validateUpdateProduct, productController.updateProduct)
+  app.put(route + '/products/update/:id', passport.authenticate('jwt', { session: false }), uploadProductImage.single(`image`), productMiddleware.validateUpdateProduct, productController.updateProduct)
 
   // delete product
-  app.delete(route + '/product/:id', passport.authenticate('jwt', { session: false }), productMiddleware.validateDeleteProduct, productController.deleteProduct)
+  app.delete(route + '/products/:id', passport.authenticate('jwt', { session: false }), productMiddleware.validateDeleteProduct, productController.deleteProduct)
 }
  

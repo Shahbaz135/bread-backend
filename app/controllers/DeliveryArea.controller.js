@@ -28,7 +28,31 @@ const updateDeliveryArea = function (req, res) {
         })
 }
 
+const getDeliveryArea = function (req, res) {
+    return deliveryAreaHelper.deliveryAreasList(req.conditions)
+        .then((data) => {
+            generalController.successResponse(res, 'Delivery area fetched successfully.', data, 'DeliveryArea.controller.getDeliveryArea')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'DeliveryArea.controller.getDeliveryArea', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'DeliveryArea.controller.getDeliveryArea', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
+const deleteDeliveryArea = function (req, res) {
+    return deliveryAreaHelper.deleteDeliveryArea(req.params)
+        .then((data) => {
+            generalController.successResponse(res, 'Delivery area deleted successfully.', data, 'DeliveryArea.controller.deleteDeliveryArea')
+        }).catch(StandardError, (err) => {
+            generalController.errorResponse(res, err, null, 'DeliveryArea.controller.deleteDeliveryArea', SERVER_RESPONSE.VALIDATION_ERROR)
+        }).catch((err) => {
+            generalController.errorResponse(res, err, 'Please check originalError for details', 'DeliveryArea.controller.deleteDeliveryArea', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+        })
+}
+
 module.exports = {
     addDeliveryArea,
-    updateDeliveryArea
+    updateDeliveryArea,
+    getDeliveryArea,
+    deleteDeliveryArea
 }

@@ -42,6 +42,7 @@ module.exports = function (sequelize, DataTypes) {
       // },
       otp: DataTypes.STRING(5),
       otpValidTill: DataTypes.DATE,
+      lastLogin: DataTypes.DATE,
      // language: DataTypes.STRING(3),
      // balance: DataTypes.DECIMAL(10, 2),
       password: DataTypes.STRING,
@@ -63,6 +64,10 @@ module.exports = function (sequelize, DataTypes) {
     {
       associate: function (models) {
         User.belongsTo(models.Role)
+        User.hasMany(models.Customer, {
+          foreignKey: 'UserId', 
+          as: 'UserCustomer' 
+        })
         User.hasMany(models.Bakery, {
           foreignKey: 'UserId', 
           as: 'UserBakery' 
@@ -91,7 +96,19 @@ module.exports = function (sequelize, DataTypes) {
           through: 'TourUsers',
           as: 'tourUsers',
           foreignKey: 'UserId'
-      })
+        })
+        User.hasMany(models.Category, {
+          foreignKey: 'UserId', 
+          as: 'UserCategory' 
+        })
+        User.hasMany(models.Product, {
+          foreignKey: 'UserId', 
+          as: 'UserProduct' 
+        })
+        User.hasMany(models.NonDeliveryDay, {
+          foreignKey: 'UserId', 
+          as: 'UserNonDeliveryDays' 
+        })
       }
       
     }

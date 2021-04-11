@@ -2,8 +2,7 @@
 
 const orderMiddleware = require('../middlewares/order.middleware')
 const orderController = require('../controllers/order.controller')
-
-
+const passport = require('../config/passport')
 
 module.exports = function (app, apiVersion) {
     const route = apiVersion

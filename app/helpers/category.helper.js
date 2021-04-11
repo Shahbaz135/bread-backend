@@ -9,15 +9,11 @@ const helpingHelperMethods = require('./helping.helper')
 
 ///// creating new category
 function createCategory(input) {
-    let categoryObj = {
-        title: input.name,
-        PartnerId: input.partnerId
-    }
+    let categoryObj = input;
 
     return db.Category.findOne({
         where: {
-            title: categoryObj.title,
-            PartnerId: categoryObj.PartnerId
+            title: categoryObj.title
         } 
     })
     .then(async (category) => {
@@ -56,45 +52,28 @@ function createCategory(input) {
     })
 }
 
-
-////// to get all categories of partner
-async function getCategoriesOfPartner (input) {
-    let query = {PartnerId: input.partnerId, isDeleted: false}
-
+////get all categories
+function getAllCategories(input) {
     return db.Category.findAll({
-        where: query,
-        include: [{
-            model: db.Product,
-            as : 'relatedProducts',
-            required: true
-        }]
+        where: input,
+        order: [
+          ['createdAt', 'DESC'],
+        ],
+        // include:
+        //     [
+        //         {
+        //             model: db.Product,
+        //             as: `relatedProducts`,
+        //             attributes: [`id`, `name`],
+        //             through: {attributes: []},
+        //             required: false,
+        //         }
+        //     ]
     })
-        .then(async result => {
-            // console.log(result.toJSON())
-            let categories = JSON.stringify(result, null, 2)
-            categories = JSON.parse(categories);
-
-            ///// temp days
-            let daysWithCategories = []
-            let weeklyDays = [`MON`, `TUE`, `WED`, `THU`, `FRI`, `SAT`, `SUN`]
-            for (let i=0; i< 7; i++) {
-                let obj = {
-                    id: i+1,
-                    day: weeklyDays[i],
-                    categories: categories
-                }
-
-                daysWithCategories.push(obj);
-            }
-
-            return daysWithCategories;
-        })
-        .catch(generalHelpingMethods.catchException)
 }
 
 function AllCategoriesByDay(data) {
-    let dayId = data.dayId;
-    let partnerId = data.partnerId;
+    let query = data;
     return db.WeekDays.findAll({
         // where: {id: dayId},
         attributes: [`id`, `day`],
@@ -102,7 +81,7 @@ function AllCategoriesByDay(data) {
             [
                 {
                     model: db.Category,
-                    where: { PartnerId: partnerId },
+                    where: query,
                     as: `categoryDays`,
                     attributes: [`id`, `title`],
                     through: {attributes: []},
@@ -132,6 +111,12 @@ function AllCategoriesByDay(data) {
 function getCategoriesByDeliveryAreaRegular(data) {
     let postCode = data.postCode;
     let partnerId = data.partnerId;
+    let categoryQuery = {};
+
+    if (partnerId) {
+        categoryQuery.PartnerId = partnerId;
+    }
+
     let dayQuery = {};
 
     if (data.dayId) {
@@ -169,7 +154,7 @@ function getCategoriesByDeliveryAreaRegular(data) {
             [
                 {
                     model: db.Category,
-                    where: { PartnerId: partnerId },
+                    where: categoryQuery,
                     as: `categoryDays`,
                     attributes: [`id`, `title`],
                     through: {attributes: []},
@@ -266,6 +251,31 @@ function editCategory(data, id) {
     })
 }
 
+//// to delete category
+const deleteCategory = (input) => {
+    return db.Category.findOne({
+      where: {
+        id: input.id,
+        isDeleted: false
+      }
+    })
+      .then((category) => {
+        if (_.isEmpty(category)) {
+          // Employee not found, return error
+          return generalHelpingMethods.rejectPromise([{
+            field: 'id',
+            error: 1575,
+            message: 'No Category found against given id.'
+          }])
+        }
+        // employee found, change value of isDeleted to true
+        category.isDeleted = true
+        // save employee
+        category.save()
+        return true
+    })
+}
+
 
 ////// function to get products
 function fetchProducts(data) {
@@ -318,8 +328,9 @@ function fetchProducts(data) {
 
 module.exports = {
     createCategory,
-    getCategoriesOfPartner,
+    getAllCategories,
     editCategory,
     AllCategoriesByDay,
-    getCategoriesByDeliveryAreaRegular
+    getCategoriesByDeliveryAreaRegular,
+    deleteCategory
 }

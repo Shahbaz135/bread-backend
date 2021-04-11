@@ -25,31 +25,37 @@ module.exports = function (sequelize, DataTypes) {
       label: {
         type: DataTypes.INTEGER,
       },
-      item: {
-        type: DataTypes.INTEGER,
+      articleNo: {
+        type: DataTypes.STRING,
+      },
+      sortCapture: {
+        type: DataTypes.STRING,
       },
       description: {
         type: DataTypes.STRING(200)
       },
       vatRate: {
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
       },
       image: {
         type: DataTypes.STRING(100)
       },
-      orderFrom: {
-        type: DataTypes.DATEONLY,
+      orderForm: {
+        type: DataTypes.STRING,
       },
       isTrailAvailable: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
       },
-      availableDays: {
-        type: DataTypes.JSON
-      },
       isHideOnSupplierOrder: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+      },
+      viewArticle: {
+        type: DataTypes.BOOLEAN,
+      },
+      isGraded: {
+        type: DataTypes.BOOLEAN,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -67,6 +73,10 @@ module.exports = function (sequelize, DataTypes) {
         Product.belongsTo(models.Partner, {
           as: 'PartnerProduct',
           foreignKey: 'PartnerId'
+        })
+        Product.belongsTo(models.User, {
+          as: 'UserProduct',
+          foreignKey: 'UserId'
         })
         Product.belongsToMany(models.WeekDays, {
           through: 'ProductDay',

@@ -2,7 +2,7 @@
 
 const customerMiddleware = require('../middlewares/customer.middleware')
 const customerController = require('../controllers/customer.controller')
-
+const passport = require('../config/passport') 
 
 
 module.exports = function (app, apiVersion) {
@@ -13,21 +13,20 @@ module.exports = function (app, apiVersion) {
 
     app.post(route + '/customer/login', customerMiddleware.validateLoginCredentials, customerController.login)
 
-     // update product
-    app.put(route + '/customer/update/:id', customerMiddleware.validateUpdateCustomer, customerController.updateCustomer)
+    // update customer
+    app.put(route + '/customer/update/:id', passport.authenticate('jwt', { session: false }), customerMiddleware.validateUpdateCustomer, customerController.updateCustomer)
 
-    app.get(route + '/customer/getById', customerMiddleware.validateGetCustomerById, customerController.getCustomerById)
+    app.get(route + '/customer/getById', passport.authenticate('jwt', { session: false }), customerMiddleware.validateGetCustomerById, customerController.getCustomerById)
 
-    app.post(route + '/customer/checkPassword', customerMiddleware.validateChangePassword, customerController.checkPassword)
+    app.post(route + '/customer/checkPassword', passport.authenticate('jwt', { session: false }), customerMiddleware.validateChangePassword, customerController.checkPassword)
 
-    app.post(route + '/customer/changePassword', customerMiddleware.validateChangePassword, customerController.changePassword)
+    app.post(route + '/customer/changePassword', passport.authenticate('jwt', { session: false }), customerMiddleware.validateChangePassword, customerController.changePassword)
 
     // new partner registration
-    app.post(route + '/customer/create', customerMiddleware.validateCreateCustomer, customerController.createCustomer)
+    app.post(route + '/customer/create', passport.authenticate('jwt', { session: false }), customerMiddleware.validateCreateCustomer, customerController.createCustomer)
 
-    // app.get(route + '/getAllPartners', partnerMiddleware.validateGetAllPartners, partnerController.getAllPartners)
+    app.get(route + '/customer/getAll', passport.authenticate('jwt', { session: false }), customerMiddleware.validateGetCustomers, customerController.getAllCustomers)
 
-
-    // app.get(route + '/getPartnerByPostalCode', partnerMiddleware.validateGetPartnerByPostalCode, partnerController.getPartnerByPostalCode)
+    app.delete(route + '/customer/delete/:id', passport.authenticate('jwt', { session: false }), customerMiddleware.validateDeleteCustomer, customerController.deleteCustomer)
 
 }

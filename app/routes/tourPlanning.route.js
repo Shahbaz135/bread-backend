@@ -2,6 +2,7 @@
 
 const tourMiddleware = require('../middlewares/tourPlanning.middleware')
 const tourController = require('../controllers/tourPlanning.controller')
+const passport = require('../config/passport') 
 
 
 
@@ -9,16 +10,18 @@ module.exports = function (app, apiVersion) {
     const route = apiVersion
 
     // new partner registration
-    app.post(route + '/tours/create', tourMiddleware.validateAddTour, tourController.createTour)
+    app.post(route + '/tours/create', passport.authenticate('jwt', { session: false }), tourMiddleware.validateAddTour, tourController.createTour)
 
-    app.get(route + '/tours/get', tourMiddleware.validateGetTours, tourController.getTours)
+    app.get(route + '/tours/get', passport.authenticate('jwt', { session: false }), tourMiddleware.validateGetTours, tourController.getTours)
+
+    app.post(route + '/tours/get', passport.authenticate('jwt', { session: false }), tourMiddleware.validateGetTours, tourController.getTours)
 
     // app.get(route + '/order/getById', orderMiddleware.validateGetOrderById, orderController.getOrderById)
 
-    // // update product
-    // app.put(route + '/order/:id', orderMiddleware.validateUpdateOrder, orderController.updateOrder)
+    // // update tour
+    app.put(route + '/tours/:id', passport.authenticate('jwt', { session: false }), tourMiddleware.validateUpdateTour, tourController.updateTour)
 
-    // // delete order
-    // app.delete(route + '/order/:id', orderMiddleware.validateDeleteOrder, orderController.deleteOrder)
+    // // delete tour
+    app.delete(route + '/tours/:id', passport.authenticate('jwt', { session: false }), tourMiddleware.validateDeleteTour, tourController.deleteTour)
 
 }

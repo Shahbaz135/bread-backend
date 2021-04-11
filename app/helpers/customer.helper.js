@@ -74,7 +74,6 @@ function registration(input) {
   })
 }
 
-
 ///// Customer Login
 //// partner login
 function login(input) {
@@ -162,9 +161,37 @@ function login(input) {
 function getCustomerById(data) {
   let query = {id: data.id};
   query.isDeleted = false;
-  query.isActive = true;
+  // query.isActive = true;
 
-  return db.Customer.findOne({ where: query })
+  return db.Customer.findOne({ 
+    where: query,
+    attributes: { exclude: ['password', 'salt'] },
+    include:
+      [
+        {
+          model: db.Order,
+          as: `CustomerOrders`,
+          attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `isTrail`, `isActive`],
+          required: false,
+          include: [
+            {
+              model: db.CustomerOrder,
+              as: `OrderDetail`,
+              attributes: [`id`, `quantity`, `product`, `price`],
+              required: false,
+              include: [
+                {
+                  model: db.WeekDays,
+                  as: `OrderDay`,
+                  attributes: [`id`, `day`],
+                  required: false,
+                }
+              ]
+            }
+          ]
+        },
+      ] 
+  })
     .then((customer) => {
       if (!customer) {
         // user not found, throw error
@@ -175,28 +202,8 @@ function getCustomerById(data) {
         }])
       } else {
         // convert mongoose document object to plain json object and return user
-        return customer.toJSON()
+        return customer
       }
-    })
-    .then((customer) => {
-      const customerData = {
-        id: customer.id,
-        fName: customer.fName,
-        lName: customer.lName,
-        salutation: customer.salutation,
-        email: customer.email,
-        phone: customer.phone,
-        postalCode: customer.postalCode,
-        town: customer.town,
-        houseStreetNumber: customer.houseStreetNumber,
-        company:customer.company,
-        birthDay: customer.birthDay,
-        deliverNotes: customer.deliverNotes,
-        recommendationOf: customer.recommendationOf,
-        desiredDate: customer.desiredDate
-      }
-     
-      return customerData;
     })
 }
 
@@ -217,9 +224,6 @@ const updateCustomer = (data, id) => {
         }])
       }
       // Update product
-      // customer.update(data).then(updatedRecord => {
-      //   console.log(updatedRecord);
-      // })
       customer.set(data)
       return customer.save()
     })
@@ -341,6 +345,46 @@ function createCustomer(input) {
   })
 }
 
+///// to get customers
+function getAllCustomers(data) {
+  let query = data;
+  query.isDeleted = false;
+  // query.isActive = true;
+
+  return db.Customer.findAll({ 
+    where: query,
+    attributes: { exclude: ['password', 'salt']},
+    order: [
+      ['createdAt', 'DESC'],
+    ],
+   })
+}
+
+//// to delete customer
+const deleteCustomer = (input) => {
+  return db.Customer.findOne({
+    where: {
+      id: input.id,
+      isDeleted: false
+    }
+  })
+    .then((customer) => {
+      if (_.isEmpty(customer)) {
+        // Employee not found, return error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'id',
+          error: 1575,
+          message: 'No customer found against given id.'
+        }])
+      }
+      // employee found, change value of isDeleted to true
+      customer.isDeleted = true
+      // save employee
+      customer.save()
+      return true
+  })
+}
+
 
 module.exports = {
     registration,
@@ -349,7 +393,9 @@ module.exports = {
     getCustomerById,
     changePassword,
     checkPassword,
-    createCustomer
+    createCustomer,
+    getAllCustomers,
+    deleteCustomer
     // getPartnerByPostalCode,
     // getAllPartners
   }

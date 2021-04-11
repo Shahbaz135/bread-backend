@@ -12,7 +12,6 @@ function addProduct(data, file) {
   return db.Product.findOne({
     where : {
       name: data.name,
-      PartnerId: data.PartnerId
     }
   })
   .then(async (product) => {
@@ -50,56 +49,37 @@ function addProduct(data, file) {
       return insertedProduct.save()
     })
     .catch(generalHelpingMethods.catchException)
-
-    // return {
-    // id: newProduct.id,
-    // name: newProduct.name,
-    // }
   })
 }
 
 // search products
-function searchProducts (conditions, limit = 50, offset = 0) {
-  let baseQuery = 'SELECT `Products`.`id`, `Products`.`name`, `Products`.`nameUrdu`, `Products`.`unit`, `Products`.`unitUrdu`, `Products`.`thumb`' +
-    ' FROM `Products`'
-
-  if (conditions.SupplierId) {
-    baseQuery = baseQuery + ' INNER JOIN `SupplierProducts` ON `SupplierProducts`.`ProductId` = `Products`.`id` '
-  }
-
-  baseQuery = baseQuery + ' WHERE `Products`.`isDeleted` = 0 AND `Products`.`isActive` = 1'
-
-  if (conditions.SupplierId) {
-    baseQuery = baseQuery + ' AND `SupplierProducts`.`SupplierId` = :SupplierId'
-  }
-
-  if (conditions.CategoryId) {
-    baseQuery = baseQuery + ' AND `Products`.`CategoryId` = :CategoryId'
-  }
-
-  if (conditions.name) {
-    baseQuery = baseQuery + ' AND (`Products`.`name` like \'%' + conditions.name + '%\' OR `Products`.`nameUrdu` like \'%' + conditions.name + '%\')'
-  }
-
-  // GROUP BY product id.
-  baseQuery = baseQuery + ' GROUP BY `Products`.`id` ORDER BY 2'
-
-  baseQuery = baseQuery + ' LIMIT :limit'
-  conditions.limit = limit
-
-  // Check for offset.
-  if (!isNaN(offset)) {
-    baseQuery = baseQuery + ' OFFSET :offset'
-    conditions.offset = offset
-  }
-
-  return db.sequelize.query(baseQuery, {
-    replacements: conditions,
-    type: db.sequelize.QueryTypes.SELECT
+function searchProducts (conditions) {
+  let query = conditions;
+  query.isDeleted = false;
+  
+  return db.Product.findAll({ 
+    where: query,
+    order: [
+      ['createdAt', 'DESC'],
+    ],
+    include:
+      [
+        {
+          model: db.WeekDays,
+          as: `productWeekDays`,
+          attributes: [`id`, `day`],
+          through: {attributes: []},
+          required: false,
+        }
+      ]
   })
 }
 
-const updateProduct = (data, id) => {
+const updateProduct = (data, file, id) => {
+  if (file) {
+    data.image = `images/` + file.filename
+  }
+
   return db.Product.findOne({
     where: {
       id: id,
@@ -118,6 +98,26 @@ const updateProduct = (data, id) => {
       // Update product
       product.set(data)
       return product.save()
+        .then(async insertedProduct => {
+          //// first deleting previous order details
+          await db.ProductDay.destroy({
+            where: {
+              ProductId: id
+            }
+          })
+
+          // adding week days
+          let dayIds = data.weekDaysId
+          const productDays = []
+          for (let i = 0; i < dayIds.length; i++) {
+            productDays.push({
+              ProductId: id,
+              WeekDaysId: dayIds[i]
+            })
+          }
+          db.ProductDay.bulkCreate(productDays)
+          return insertedProduct.save()
+        })
     })
 }
 
