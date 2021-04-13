@@ -95,6 +95,18 @@ const validateGetAllCategories = (req, res, done) => {
       }
       validatedQuery.UserId = query.userId
     }
+
+    // postCode Is required, validating as number
+    if (query.hasOwnProperty('postCode') && query.postCode) {
+      if (!(query.postCode) || _.isNaN(query.postCode)) {
+        errorArray.push({
+          field: 'postCode',
+          error: 90220,
+          message: '\'postCode\' is required as Numeric .'
+        })
+      }
+      validatedQuery.postCode = query.postCode
+    }
     
 
     // day id Is required, validating as number
@@ -122,12 +134,14 @@ const validateGetCategoriesByArea = (req, res, done) => {
   const query = req.query
 
   // partnerId Is required, validating as number
-  if (!(query.partnerId) || _.isNaN(query.partnerId)) {
+  if (query.hasOwnProperty(`partnerId`)) {
+    if (!(query.partnerId) || _.isNaN(query.partnerId)) {
       errorArray.push({
       field: 'partnerId',
       error: 90220,
       message: '\'partnerId\' is required as Numeric .'
       })
+    }
   }
 
   // day id Is required, validating as number

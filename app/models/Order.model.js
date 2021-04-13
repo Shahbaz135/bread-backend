@@ -19,7 +19,11 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.BOOLEAN
       },
       isTrail: {
-      type: DataTypes.BOOLEAN
+        type: DataTypes.BOOLEAN
+      },
+      isAdditional: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
       },
       isActive: {
         type: DataTypes.BOOLEAN,

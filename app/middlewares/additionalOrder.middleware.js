@@ -68,6 +68,18 @@ const validateCreateOrder = (req, res, done) => {
         validatedConditions.status = body.status
     }
 
+    // is trail is optional, validating it as boolean
+    if (body.hasOwnProperty('isAdditional')) {
+        if (!_.isBoolean(body.isAdditional)) {
+            errorArray.push({
+            field: "isAdditional",
+            error: 1009,
+            message: "'isAdditional' is required as boolean",
+            });
+        }
+        validatedConditions.isAdditional = body.isAdditional
+    }
+
     // send array if error(s)
     if (errorArray.length) {
         return generalMiddleware.standardErrorResponse(res, errorArray, 'additionalOrder.middleware.validateCreateOrder')

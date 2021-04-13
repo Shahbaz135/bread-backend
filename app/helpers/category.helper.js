@@ -59,7 +59,7 @@ function getAllCategories(input) {
         order: [
           ['createdAt', 'DESC'],
         ],
-        // include:
+        // include: 
         //     [
         //         {
         //             model: db.Product,
@@ -73,39 +73,111 @@ function getAllCategories(input) {
 }
 
 function AllCategoriesByDay(data) {
-    let query = data;
-    return db.WeekDays.findAll({
-        // where: {id: dayId},
-        attributes: [`id`, `day`],
+    let postCode = data.postCode;
+    let PartnerId = data.PartnerId
+    let categoryQuery = {};
+
+    if (PartnerId) {
+        categoryQuery.PartnerId = PartnerId;
+    }
+
+    let dayQuery = {};
+
+    if (data.dayId) {
+        dayQuery.id = data.dayId;
+    }
+
+    return db.DeliveryArea.findOne({
+        where: {postCode: postCode},
+        attributes: [`id`, `postCode`],
         include:
             [
                 {
-                    model: db.Category,
-                    where: query,
-                    as: `categoryDays`,
-                    attributes: [`id`, `title`],
+                    model: db.WeekDays,
+                    as: `sampleDeliveryDay`,
+                    where: dayQuery,
+                    attributes: [`id`, `day`],
                     through: {attributes: []},
                     required: false,
                 }
             ]
     })
     .then(async days => {
-
-        // console.log(JSON.parse(JSON.stringify(days)));
-        let result = JSON.parse(JSON.stringify(days));
-
-        //// iterating through all days
-        for(let day of result) {
-            await fetchProducts(day)
-                .then(response => {
-                    // temp.push(response);
-                    day.categoryDays = response;
-                    // console.log(response);
-                })
+        
+        if (!days) {
+            return false
         }
-
-        return result;
+        let result = days.toJSON();
+        let daysId = result.sampleDeliveryDay.map(x => x.id);
+        return daysId;
     })
+    .then (async dayIds => {
+        return db.WeekDays.findAll({
+            where: {id: dayIds},
+            attributes: [`id`, `day`],
+            include:
+                [
+                    {
+                        model: db.Category,
+                        where: {},
+                        as: `categoryDays`,
+                        attributes: [`id`, `title`],
+                        through: {attributes: []},
+                        required: false,
+                    }
+                ]
+        })
+        .then(async days => {
+
+            // console.log(JSON.parse(JSON.stringify(days)));
+            let result = JSON.parse(JSON.stringify(days));
+
+            //// iterating through all days
+            for(let day of result) {
+                await fetchProducts(day)
+                    .then(response => {
+                        // temp.push(response);
+                        day.categoryDays = response;
+                        // console.log(response);
+                    })
+            }
+
+            return result;
+        })
+    })
+
+    // return db.WeekDays.findAll({
+    //     // where: {id: dayId},
+    //     attributes: [`id`, `day`],
+    //     include:
+    //         [
+    //             {
+    //                 model: db.Category,
+    //                 where: {},
+    //                 as: `categoryDays`,
+    //                 attributes: [`id`, `title`],
+    //                 through: {attributes: []},
+    //                 required: false,
+    //             }
+    //         ]
+    // })
+    // .then(async days => {
+
+    //     // console.log(JSON.parse(JSON.stringify(days)));
+    //     let result = JSON.parse(JSON.stringify(days));
+
+    //     //// iterating through all days
+    //     for(let day of result) {
+    //         await fetchProducts(day)
+    //             .then(response => {
+    //                 // temp.push(response);
+    //                 day.categoryDays = response;
+    //                 // console.log(response);
+    //             })
+    //     }
+
+    //     return result;
+    // })
 }
 
 function getCategoriesByDeliveryAreaRegular(data) {

@@ -108,16 +108,11 @@ function login(input) {
       ///// getting partner of this customer
       await db.Partner.findOne({ where: { id: user.PartnerId, isDeleted: false, isActive: true } })
         .then(partner => {
-          if (!partner) {
-            // partner not found, throw error
-            return generalHelpingMethods.rejectPromise([{
-              field: 'Partner',
-              error: 1540,
-              message: 'Partner not found of this customer'
-            }])
+          if (partner) {
+            userData.partnerId = partner.toJSON().id;
+          } else {
+            userData.partnerId = null;
           }
-
-          userData.partnerId = partner.toJSON().id;
         })
 
       userData.userInfo = user

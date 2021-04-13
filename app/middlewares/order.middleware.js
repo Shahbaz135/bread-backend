@@ -91,6 +91,18 @@ const validateCreateOrder = (req, res, done) => {
         validatedConditions.isTrail = body.isTrail
     }
 
+    // is trail is optional, validating it as boolean
+    if (body.hasOwnProperty('isAdditional')) {
+        if (!_.isBoolean(body.isAdditional)) {
+            errorArray.push({
+            field: "isAdditional",
+            error: 1009,
+            message: "'isAdditional' is required as boolean",
+            });
+        }
+        validatedConditions.isAdditional = body.isAdditional
+    }
+
     // status is optional, validating it as boolean
     if (body.hasOwnProperty('status')) {
         if (!_.isString(body.status)) {

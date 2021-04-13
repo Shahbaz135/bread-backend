@@ -53,12 +53,12 @@ function getOrderById(input) {
   
     return db.AdditionalOrder.findOne({ 
         where: query,
-        attributes: [`id`, `validFrom`, `expiryDate`, `status`],
+        attributes: [`id`, `deliveryDate`, `status`],
         include:
             [
                 {
-                    model: db.AdditionalCustomerOrder,
-                    as: `OrderDetail`,
+                    model: db.CustomerAdditionalOrder,
+                    as: `AdditionalOrderDetail`,
                     attributes: [`id`, `quantity`, `product`, `price`],
                     required: false,
                     include: [
