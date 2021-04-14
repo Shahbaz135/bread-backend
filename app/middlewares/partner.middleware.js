@@ -53,7 +53,7 @@ const validateRegistration = (req, res, done) => {
   validatedData.password = body.password;
 
   // phone is required, validating it as not empty, valid String and length range.
-  if (body.hasOwnProperty('phone') && body.phone != ``) {
+  if (body['phone'] && body.phone != ``) {
     if (_.isEmpty(body.phone) || !_.isString(body.phone) || body.phone.length < 11 || body.phone.length > 11) {
       errorArray.push({
         field: 'phone',
@@ -85,7 +85,7 @@ const validateRegistration = (req, res, done) => {
   validatedData.houseStreetNumber = body.houseStreetNumber;
 
   // Town is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('town') && body.town != ``) {
+  if (body['town'] && body.town != ``) {
     if (_.isEmpty(body.town) || !_.isString(body.town) ) {
       errorArray.push({
         field: 'town',
@@ -98,7 +98,7 @@ const validateRegistration = (req, res, done) => {
   
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('iban') && body.iban != ``) {
+  if (body['iban'] && body.iban != ``) {
     if (_.isEmpty(body.iban) || !_.isString(body.iban) ) {
       errorArray.push({
         field: 'iban',
@@ -110,33 +110,38 @@ const validateRegistration = (req, res, done) => {
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isIban')) {
+  if (body['isIban']) {
     validatedData.isIban = body.isIban;
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isName')) {
+  if (body['isName'] != null) {
     validatedData.isName = body.isName;
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isEmail')) {
+  if (body['isEmail']!= null) {
     validatedData.isEmail = body.isEmail;
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isPassword')) {
+  if (body['isPassword'] != null) {
     validatedData.isPassword = body.isPassword;
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isHouseStreetNumber')) {
+  if (body['isHouseStreetNumber'] != null) {
     validatedData.isHouseStreetNumber = body.isHouseStreetNumber;
   }
 
   // IBAN is required, validating it as not empty, valid String.
-  if (body.hasOwnProperty('isTown')) {
+  if (body['isTown'] != null) {
     validatedData.isTown = body.isTown;
+  }
+
+  // IBAN is required, validating it as not empty, valid String.
+  if (body['isPostalCode'] != null) {
+    validatedData.isPostalCode = body.isPostalCode;
   }
 
   // send array if error(s)
@@ -248,7 +253,6 @@ const validateUpdatePartner = (req, res, done) => {
   const errorArray = []
   const validatedConditions = {}
 
-
    // id is required, validating as not empty, valid numeric value with range.
   if (!id || isNaN(id)) {
       errorArray.push({
@@ -260,7 +264,7 @@ const validateUpdatePartner = (req, res, done) => {
 
 
   // validFrom date is optional, validating it as not empty, valid number
-  if (body.hasOwnProperty('name') && body.name != ``) {
+  if (body['name'] && body.name != ``) {
       if (_.isEmpty(body.name) || !_.isString(body.name)) {
           errorArray.push({
           field: "name",
@@ -272,7 +276,7 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
   // expiry date is optional, validating it as not empty, valid number
-  if (body.hasOwnProperty('email') && body.email != ``) {
+  if (body['email'] && body.email != ``) {
       if (_.isEmpty(body.email) || !_.isString(body.email)) {
           errorArray.push({
           field: "email",
@@ -284,31 +288,34 @@ const validateUpdatePartner = (req, res, done) => {
   }
   
   // is one time is optional, validating it as boolean
-  if (body.hasOwnProperty('isName')) {
-      if (!_.isBoolean(body.isName)) {
-          errorArray.push({
-          field: "isName",
-          error: 1009,
-          message: "'isName' is required as boolean",
-          });
-      }
-      validatedConditions.isName = body.isName
+  if (body['isName']) {
+    body.isName = JSON.parse(body.isName);
+    if (!_.isBoolean(body.isName)) {
+        errorArray.push({
+        field: "isName",
+        error: 1009,
+        message: "'isName' is required as boolean",
+        });
+    }
+    validatedConditions.isName = body.isName
   }
 
   // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isEmail')) {
-      if (!_.isBoolean(body.isEmail)) {
-          errorArray.push({
-          field: "isEmail",
-          error: 1009,
-          message: "'isEmail' is required as boolean",
-          });
-      }
-      validatedConditions.isEmail = body.isEmail
+  if (body['isEmail']) {
+    body.isEmail = JSON.parse(body.isEmail);
+    if (!_.isBoolean(body.isEmail)) {
+        errorArray.push({
+        field: "isEmail",
+        error: 1009,
+        message: "'isEmail' is required as boolean",
+        });
+    }
+    validatedConditions.isEmail = body.isEmail
   }
 
   // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isPassword')) {
+  if (body['isPassword']) {
+    body.isPassword = JSON.parse(body.isPassword);
     if (!_.isBoolean(body.isPassword)) {
         errorArray.push({
         field: "isPassword",
@@ -320,7 +327,8 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
   // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isPostalCode')) {
+  if (body['isPostalCode']) {
+    body.isPostalCode = JSON.parse(body.isPostalCode);
     if (!_.isBoolean(body.isPostalCode)) {
         errorArray.push({
         field: "isPostalCode",
@@ -332,7 +340,8 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
    // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isHouseStreetNumber')) {
+  if (body['isHouseStreetNumber']) {
+    body.isHouseStreetNumber = JSON.parse(body.isHouseStreetNumber);
     if (!_.isBoolean(body.isHouseStreetNumber)) {
         errorArray.push({
         field: "isHouseStreetNumber",
@@ -344,7 +353,8 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
    // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isTown')) {
+  if (body['isTown']) {
+    body.isTown = JSON.parse(body.isTown);
     if (!_.isBoolean(body.isTown)) {
         errorArray.push({
         field: "isTown",
@@ -356,7 +366,8 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
    // is trail is optional, validating it as boolean
-  if (body.hasOwnProperty('isIban')) {
+  if (body['isIban']) {
+    body.isIban = JSON.parse(body.isIban);
     if (!_.isBoolean(body.isIban)) {
         errorArray.push({
         field: "isIban",
@@ -380,7 +391,7 @@ const validateUpdatePartner = (req, res, done) => {
   // }
 
   // status is optional, validating it as boolean
-  if (body.hasOwnProperty('postalCode')) {
+  if (body['postalCode']) {
     if (!_.isString(body.postalCode)) {
         errorArray.push({
         field: "postalCode",
@@ -392,7 +403,7 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
   // status is optional, validating it as boolean
-  if (body.hasOwnProperty('houseStreetNumber') &&  body.houseStreetNumber !== ``) {
+  if (body['houseStreetNumber'] &&  body.houseStreetNumber !== ``) {
     if (!_.isString(body.houseStreetNumber)) {
         errorArray.push({
         field: "houseStreetNumber",
@@ -404,7 +415,7 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
   // status is optional, validating it as boolean
-  if (body.hasOwnProperty('town') &&  body.town !== ``) {
+  if (body['town'] &&  body.town !== ``) {
     if (!_.isString(body.town)) {
         errorArray.push({
         field: "town",
@@ -416,7 +427,7 @@ const validateUpdatePartner = (req, res, done) => {
   }
 
   // status is optional, validating it as boolean
-  if (body.hasOwnProperty('iban') && body.iban !== `` && body.iban) {
+  if (body['iban'] && body.iban !== `` && body.iban) {
     if (!_.isString(body.iban)) {
         errorArray.push({
         field: "iban",

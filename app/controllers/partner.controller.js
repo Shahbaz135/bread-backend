@@ -51,7 +51,7 @@ const getAllPartners = function (req, res) {
 
 // To update order
 const updatePartner = function (req, res) {
-  return partnerHelper.updatePartner(req.body.data, req.body.id)
+  return partnerHelper.updatePartner(req.body.data, req.body.id, req.file)
     .then((data) => {
         generalController.successResponse(res, 'Partner Updated successfully.', data, 'partner.controller. updatePartner')
     }).catch(StandardError, (err) => {

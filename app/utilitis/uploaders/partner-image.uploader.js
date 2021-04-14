@@ -30,6 +30,6 @@ const fileFilter = (req, file, callback) => {
     }
 }
 
-const uploadPartnerImage = multer({ storage: storage, fileFilter: fileFilter});
+const uploadPartnerImage = multer({ storage: storage});
 
 module.exports.uploadPartnerImage = uploadPartnerImage;

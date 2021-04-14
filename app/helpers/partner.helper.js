@@ -157,7 +157,10 @@ function getAllPartners(input) {
 }
 
 //// to edit partners
-function updatePartner(data, id) {
+function updatePartner(data, id, file) {
+  if (file) {
+    data.image = `images/` + file.filename
+  }
   return db.Partner.findOne({
     where: {
       id: id,

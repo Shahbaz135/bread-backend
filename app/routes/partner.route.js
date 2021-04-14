@@ -19,6 +19,6 @@ module.exports = function (app, apiVersion) {
     app.get(route + '/partner/getByPostalCode', partnerMiddleware.validateGetPartnerByPostalCode, partnerController.getPartnerByPostalCode)
 
     // update product
-    app.put(route + '/partner/:id', partnerMiddleware.validateUpdatePartner, partnerController.updatePartner)
+    app.put(route + '/partner/:id', uploadPartnerImage.single('picture'), partnerMiddleware.validateUpdatePartner, partnerController.updatePartner)
 
 }
