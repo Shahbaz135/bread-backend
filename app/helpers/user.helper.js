@@ -12,18 +12,12 @@ function signUp (input) {
     fName: input.fName,
     lName: input.lName,
     email: input.email,
-    mobileNumber: input.mobileNumber,
-    postalCode: input.postalCode,
-    houseStreetNumber: input.houseStreetNumber,
-    town: input.town,
-    // otp: Math.round(Math.random() * 9000 + 1000),
-    // otpValidTill: now,
-    phone: input.phone,
-    // RoleId: 1
+    RoleId: input.RoleId,
+    isReceiveEmail: input.isReceiveEmail
   }
 
   // check if input phone already exist
-  return db.User.findOne({ where: { phone: userObj.phone } })
+  return db.User.findOne({ where: { email: userObj.email } })
     // execute all these functions
     .then(async (user) => {
       const errorsArray = []
@@ -31,32 +25,10 @@ function signUp (input) {
       if (user) {
         // user phone already exist.
         errorsArray.push({
-          field: 'phone',
+          field: 'email',
           error: 1500,
-          message: 'phone already exist'
+          message: 'email already exist'
         })
-      }
-
-      if (userObj.email) {
-        if (db.User.findOne({ email: userObj.email })) {
-          // user email already exist.
-          errorsArray.push({
-            field: 'email',
-            error: 1505,
-            message: 'email already exist'
-          })
-        }
-      }
-
-      if (userObj.mobileNumber) {
-        if (db.User.findOne({ mobileNumber: userObj.mobileNumber })) {
-          // user email already exist.
-          errorsArray.push({
-            field: 'email',
-            error: 1505,
-            message: 'mobile number already exist'
-          })
-        }
       }
 
       if (!_.isEmpty(errorsArray)) {
@@ -73,7 +45,7 @@ function signUp (input) {
         fName: newUser.fName,
         lName: newUser.lName,
         email: newUser.email,
-        phone: newUser.phone,
+        // phone: newUser.phone,
       }
     })
 }
@@ -86,7 +58,7 @@ function login (input) {
 
   // check if phone exist and isDeleted equal to false
   return db.User.findOne({ where: { email: email, isDeleted: false } })
-    .then((user) => {
+    .then(async (user) => {
       if (!user || !user.salt || !user.password) {
         // user not found, throw error
         return generalHelpingMethods.rejectPromise([{
@@ -102,13 +74,16 @@ function login (input) {
           message: 'Invalid Email or Password'
         }])
       } else {
-        // convert mongoose document object to plain json object and return user
-        
+        /// updating login date
+        let date = new Date();
+        user.lastLogin = date;
+        await user.save();
+
+      // convert mongoose document object to plain json object and return user
         return user.toJSON()
       }
     })
-    .then((user) => {
-     
+    .then(async (user) => {
       userData.userInfo = user
       return
       // return db.Role.findOne({ id: user.RoleId, isDeleted: false, isActive: true })
@@ -150,12 +125,14 @@ function login (input) {
 }
 
 // get users
-function getUsers (conditions, limit = 500, offset = 0) {
+function getUsers (conditions) {
   // Check if user exist in conditions
   return db.User.findAll({
     where: conditions,
-    limit: limit,
-    offset: offset
+    order: [
+      ['createdAt', 'ASC'],
+    ], 
+    attributes: { exclude: ['password', 'salt'] }
   })
     .then(async (users) => {
       const count = await db.User.count({
@@ -163,9 +140,107 @@ function getUsers (conditions, limit = 500, offset = 0) {
       })
       // return user
       return {
-        records: users,
+        data: users,
         count: count
       }
+    })
+}
+
+// get users
+// function getUserById (conditions) {
+//   let query = conditions;
+
+//   return db.User.findOne({ 
+//     where: query,
+//     })
+//     .then((user) => {
+//       if (!user) {
+//         // user not found, throw error
+//         return generalHelpingMethods.rejectPromise([{
+//           field: 'id',
+//           error: 1540,
+//           message: 'User Not found'
+//         }])
+//       } else {
+//         // convert mongoose document object to plain json object and return user
+//         // user = user.toJSON();
+//         let password = user.encryptPassword(user.password)
+//       }
+//     })
+//     .then()
+// }
+
+const updateUser = (data, id) => {
+  return db.User.findOne({
+    where: {
+      id: id,
+      isDeleted: false
+    }
+  })
+    .then(async (user) => {
+      if (_.isEmpty(user)) {
+        // User not found, return error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'id',
+          error: 1572,
+          message: 'User not found.'
+        }])
+      }
+      const errorsArray = []
+
+      if (data.email !== user.email) {
+        await db.User.findOne({
+          where: {
+            email: data.email,
+            isDeleted: false
+          }
+        })
+          .then(exist => {
+            // console.log(`exist == `, exist);
+            if (exist) {
+              // user email already exist.
+              errorsArray.push({
+                field: 'email',
+                error: 1505,
+                message: 'email already exist, '
+              })
+            }
+          })
+      }
+
+      if (!_.isEmpty(errorsArray)) {
+        return generalHelpingMethods.rejectPromise(errorsArray, SERVER_RESPONSE.CONFLICT)
+      }
+
+      // Update user
+      user.set(data)
+      user.save()
+
+      return user.toJSON()
+    })
+}
+
+const deleteUser = (input) => {
+  return db.User.findOne({
+    where: {
+      id: input.id,
+      isDeleted: false
+    }
+  })
+    .then((user) => {
+      if (_.isEmpty(user)) {
+        // Employee not found, return error
+        return generalHelpingMethods.rejectPromise([{
+          field: 'id',
+          error: 1575,
+          message: 'No user found against given id.'
+        }])
+      }
+      // employee found, change value of isDeleted to true
+      user.isDeleted = true
+      // save employee
+      user.save()
+      return true
     })
 }
 
@@ -303,54 +378,6 @@ const changePassword = (input) => {
       // save user
       await user.save()
       return user.toJSON()
-    })
-}
-
-const updateUser = (data, id) => {
-  return db.User.findOne({
-    where: {
-      id: id,
-      isDeleted: false
-    }
-  })
-    .then((user) => {
-      if (_.isEmpty(user)) {
-        // User not found, return error
-        return generalHelpingMethods.rejectPromise([{
-          field: 'id',
-          error: 1572,
-          message: 'User not found.'
-        }])
-      }
-      // Update user
-      user.set(data)
-      user.save()
-
-      return user.toJSON()
-    })
-}
-
-const deleteUser = (input) => {
-  return db.User.findOne({
-    where: {
-      id: input.id,
-      isDeleted: false
-    }
-  })
-    .then((user) => {
-      if (_.isEmpty(user)) {
-        // Employee not found, return error
-        return generalHelpingMethods.rejectPromise([{
-          field: 'id',
-          error: 1575,
-          message: 'No user found against given id.'
-        }])
-      }
-      // employee found, change value of isDeleted to true
-      user.isDeleted = true
-      // save employee
-      user.save()
-      return true
     })
 }
 

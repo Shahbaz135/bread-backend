@@ -8,7 +8,7 @@ module.exports = function (app, apiVersion) {
   const route = apiVersion + '/role'
 
   // get role
-  app.get(route, passport.authenticate('jwt', { session: false }), roleController.getRoles)
+  app.get(route + '/get', passport.authenticate('jwt', { session: false }), roleMiddleware.validateGetRoles , roleController.getRoles)
 
   // add role
   app.post(route, passport.authenticate('jwt', { session: false }), roleMiddleware.validateAddRole, roleController.addRole)

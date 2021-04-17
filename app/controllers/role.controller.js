@@ -18,7 +18,7 @@ const addRole = function (req, res) {
 
 // get role
 const getRoles = function (req, res) {
-  return roleHelper.getRoles(req.user.EmployeeCompanyId || req.user._id, req.user.RoleId.permissions)
+  return roleHelper.getRoles(req.conditions)
     .then((data) => {
       generalController.successResponse(res, 'Role get successfully.', data, 'role.controller.getRole')
     }).catch(StandardError, (err) => {

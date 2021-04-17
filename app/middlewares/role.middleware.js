@@ -76,35 +76,24 @@ const validateAddRole = (req, res, next) => {
 // Validate Get Role
 const validateGetRoles = (req, res, next) => {
   let role = req.query
+  let validatedData = {};
 
   const errors = []
   // _id is an optional mongo db collection id, if it is given than validate it.
-  if (role.hasOwnProperty('_id')) {
+  if (role.hasOwnProperty('id')) {
   // Validating as not empty, mongo db collection id.
-    if (_.isEmpty(role._id) || !mongoose.Types.ObjectId.isValid(role._id)) {
+    if (_.isEmpty(role.id) || _.isNaN(role.id)) {
       errors.push({
-        field: '_id',
+        field: 'id',
         error: 5521,
-        message: 'Please provide only valid \'_id\'.'
+        message: 'Please provide only valid \'id\'.'
       })
     }
+    validatedData.id = role.id;
   }
-  // Validate Company Id if Provided
-  if (_.isEmpty(role.CompanyId) || !mongoose.Types.ObjectId.isValid(role.CompanyId)) {
-    errors.push({
-      field: 'CompanyId',
-      error: 5506,
-      message: 'Please provide only valid \'Company Id\'.'
-    })
-  }
-  // Validate CreatedBy if provided
-  if (_.isEmpty(role.CreatedBy) || !mongoose.Types.ObjectId.isValid(role.CreatedBy)) {
-    errors.push({
-      field: 'CreatedBy',
-      error: 5505,
-      message: 'Please provide only valid \'CreatedBy\'.'
-    })
-  }
+
+  validatedData.isDeleted = false;
+  req.conditions = validatedData
 
   next()
 }

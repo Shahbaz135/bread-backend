@@ -63,7 +63,10 @@ module.exports = function (sequelize, DataTypes) {
     ,
     {
       associate: function (models) {
-        User.belongsTo(models.Role)
+        User.belongsTo(models.Role, {
+          foreignKey: 'RoleId', 
+          as: 'relatedRoles'
+        })
         User.hasMany(models.Customer, {
           foreignKey: 'UserId', 
           as: 'UserCustomer' 

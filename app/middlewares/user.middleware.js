@@ -20,7 +20,7 @@ const validateSignUp = (req, res, done) => {
   
 
   // fName is required, validating it as not empty, valid String and length range.
-  if (_.isEmpty(body.fName) || !_.isString(bodyfName) || body.fName.length < 2 || body.fName.length > 100) {
+  if (_.isEmpty(body.fName) || !_.isString(body.fName) ) {
     errorArray.push({
       field: 'fName',
       error: 1000,
@@ -29,7 +29,7 @@ const validateSignUp = (req, res, done) => {
   }
 
   // lName is required, validating it as not empty, valid String and length range.
-  if (_.isEmpty(body.lName) || !_.isString(body.lName) || body.lName.length < 2 || body.lName.length > 100) {
+  if (_.isEmpty(body.lName) || !_.isString(body.lName) ) {
     errorArray.push({
       field: 'lName',
       error: 1000,
@@ -38,11 +38,11 @@ const validateSignUp = (req, res, done) => {
   }
 
    // password is required, validating it as not empty, valid String and length range.
-  if (_.isEmpty(body.password) || !_.isString(body.password) || body.password.length < 8 || body.password.length > 16) {
+  if (_.isEmpty(body.password) || !_.isString(body.password) ) {
     errorArray.push({
       field: 'password',
       error: 1015,
-      message: '\'password\' is required as string, length must be between 8 and 16.'
+      message: '\'password\' is required as string.'
     })
   }
 
@@ -184,23 +184,6 @@ const validateGetUsers = (req, res, done) => {
     }
   }
 
-  // // isBlocked is an optional string property, if it is given than validate it.
-  // if (query.hasOwnProperty('isBlocked')) {
-  //   // Validating as not empty, valid String and length range.
-  //   if (!query.isBlocked || (query.isBlocked != 'true' && query.isBlocked != 'false')) {
-  //     errorArray.push({
-  //       field: 'isBlocked ',
-  //       error: 1071,
-  //       message: 'Please provide only valid \'isBlocked \' as boolean.'
-  //     })
-  //   }
-  //   try {
-  //     validatedQuery.isBlocked = JSON.parse(query.isBlocked)
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }
-
   if (!_.isEmpty(errorArray)) {
     return generalMiddleware.standardErrorResponse(res, errorArray, 'user.middleware.validateGetUsers')
   }
@@ -218,6 +201,125 @@ const validateGetUsers = (req, res, done) => {
   req.limit = limit
   req.offset = offset
   done()
+}
+
+// Update User Validations
+const validateUpdateUser = (req, res, done) => {
+  const errorArray = []
+  const body = req.body
+  let id = req.params.id
+  const validatedData = {}
+
+  // if (req.user.role == 'Admin') {
+  //   // isVerified is an optional string property, if it is given than validate it.
+  //   if (body.hasOwnProperty('isVerified')) {
+  //     // Validating as not empty, valid String and length range.
+  //     if (!body.isVerified || (body.isVerified != 'true' && body.isVerified != 'false')) {
+  //       errorArray.push({
+  //         field: 'isVerified ',
+  //         error: 1148,
+  //         message: 'Please provide only valid \'isVerified \' as boolean.'
+  //       })
+  //     }
+  //     try {
+  //       validatedData.isVerified = JSON.parse(body.isVerified)
+  //     } catch (error) {
+  //       console.error(error)
+  //     }
+  //   }
+
+  // id is required, validating as not empty, valid numeric value with range.
+  if (!id || isNaN(id)) {
+    errorArray.push({
+      field: 'id',
+      error: 1132,
+      message: '\'id\' is required as numeric in params.'
+    })
+  }
+
+  // fName is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('fName')) {
+    // Validating as not empty, valid String and length range.
+    if (_.isEmpty(body.fName) || !_.isString(body.fName) ) {
+      errorArray.push({
+        field: 'fName',
+        error: 1133,
+        message: 'Please provide only valid \'fName\' as string.'
+      })
+    }
+    validatedData.fName = body.fName
+  }
+
+  // lName is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('lName') && !_.isEmpty(body.lName)) {
+    // Validating as not empty, valid String and length range.
+    if (!_.isString(body.lName) ) {
+      errorArray.push({
+        field: 'lName',
+        error: 1136,
+        message: 'Please provide only valid \'lName\' as string.'
+      })
+    }
+    validatedData.lName = body.lName
+  }
+
+  // isReceiveEmail is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('isReceiveEmail')) {
+    // Validating as not empty, valid String and length range.
+    if (!_.isBoolean(body.isReceiveEmail) ) {
+      errorArray.push({
+        field: 'isReceiveEmail',
+        error: 1136,
+        message: 'Please provide only valid \'isReceiveEmail\' as boolean.'
+      })
+    }
+    validatedData.isReceiveEmail = body.isReceiveEmail
+  }
+
+  if (body.hasOwnProperty('RoleId')) {
+    // Validating as not empty, valid String and length range.
+    if (_.isNaN(body.RoleId) ) {
+      errorArray.push({
+        field: 'RoleId',
+        error: 1136,
+        message: 'Please provide only valid \'RoleId\' as number.'
+      })
+    }
+    validatedData.RoleId = body.RoleId
+  }
+
+  // email is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('email')) {
+    // Validating as not empty, valid String and length range.
+    if (_.isEmpty(body.email) || !_.isString(body.email) || body.email.length < 5 || body.email.length > 100 || !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(body.email))) {
+      errorArray.push({
+        field: 'email',
+        error: 1139,
+        message: 'Please provide only valid \'email\' as string, length must be between 5 and 100.'
+      })
+    }
+    validatedData.email = body.email
+  }
+
+
+  // Send error Array if error(s).
+  if (!_.isEmpty(errorArray)) {
+    return generalMiddleware.standardErrorResponse(res, errorArray, 'user.middleware.validateUpdateUser')
+  }
+
+  if (_.isEmpty(validatedData)) {
+    return generalMiddleware.standardErrorResponse(res, [{
+      field: 'general',
+      error: 1154,
+      message: 'No data provided to update.'
+    }], 'user.middleware.validateUpdateUser')
+  }
+
+  req.body = {
+    data: validatedData,
+    id: id
+  }
+  return done()
 }
 
 // Validate forgot password
@@ -282,138 +384,6 @@ const validateResetPassword = (req, res, done) => {
     return generalMiddleware.standardErrorResponse(res, errorArray, 'user.middleware.validateResetPassword')
   }
 
-  return done()
-}
-
-// Update User Validations
-const validateUpdateUser = (req, res, done) => {
-  const errorArray = []
-  const body = req.body
-  let id = req.params.id
-  const validatedData = {}
-
-  if (req.user.role == 'Admin') {
-    // isVerified is an optional string property, if it is given than validate it.
-    if (body.hasOwnProperty('isVerified')) {
-      // Validating as not empty, valid String and length range.
-      if (!body.isVerified || (body.isVerified != 'true' && body.isVerified != 'false')) {
-        errorArray.push({
-          field: 'isVerified ',
-          error: 1148,
-          message: 'Please provide only valid \'isVerified \' as boolean.'
-        })
-      }
-      try {
-        validatedData.isVerified = JSON.parse(body.isVerified)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    // isBlocked is an optional string property, if it is given than validate it.
-    if (body.hasOwnProperty('isBlocked')) {
-      // Validating as not empty, valid String and length range.
-      if (!body.isBlocked || (body.isBlocked != 'true' && body.isBlocked != 'false')) {
-        errorArray.push({
-          field: 'isBlocked ',
-          error: 1152,
-          message: 'Please provide only valid \'isBlocked \' as boolean.'
-        })
-      }
-      try {
-        validatedData.isBlocked = JSON.parse(body.isBlocked)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-  } else {
-    if (id != req.user.id) {
-      errorArray.push({
-        field: 'id',
-        error: 1131,
-        message: 'You are not allowed to edit this record.'
-      })
-    }
-  }
-
-  // id is required, validating as not empty, valid numeric value with range.
-  if (!id || isNaN(id)) {
-    errorArray.push({
-      field: 'id',
-      error: 1132,
-      message: '\'id\' is required as numeric in params.'
-    })
-  }
-
-  // fName is an optional string property, if it is given than validate it.
-  if (body.hasOwnProperty('fName')) {
-    // Validating as not empty, valid String and length range.
-    if (_.isEmpty(body.fName) || !_.isString(body.fName) || body.fName.length < 2 || body.fName.length > 100) {
-      errorArray.push({
-        field: 'fName',
-        error: 1133,
-        message: 'Please provide only valid \'fName\' as string, length must be between 2 and 100.'
-      })
-    }
-    validatedData.fName = body.fName
-  }
-
-  // lName is an optional string property, if it is given than validate it.
-  if (body.hasOwnProperty('lName') && !_.isEmpty(body.lName)) {
-    // Validating as not empty, valid String and length range.
-    if (!_.isString(body.lName) || body.lName.length < 2 || body.lName.length > 100) {
-      errorArray.push({
-        field: 'lName',
-        error: 1136,
-        message: 'Please provide only valid \'lName\' as string, length must be between 2 and 100.'
-      })
-    }
-    validatedData.lName = body.lName
-  }
-
-  // email is an optional string property, if it is given than validate it.
-  if (body.hasOwnProperty('email')) {
-    // Validating as not empty, valid String and length range.
-    if (_.isEmpty(body.email) || !_.isString(body.email) || body.email.length < 5 || body.email.length > 100 || !(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(body.email))) {
-      errorArray.push({
-        field: 'email',
-        error: 1139,
-        message: 'Please provide only valid \'email\' as string, length must be between 5 and 100.'
-      })
-    }
-    validatedData.email = body.email
-  }
-
-  // language is an optional string property, if it is given than validate it.
-  if (body.hasOwnProperty('language')) {
-    // language is required, validating it as not empty, valid String and length range.
-    if (_.isEmpty(body.language) || !_.isString(body.language) || (body.language != 'eng' && body.language != 'urd')) {
-      errorArray.push({
-        field: 'language',
-        error: 1145,
-        message: '\'language\' is required as string, must be eng/urd.'
-      })
-    }
-    validatedData.language = body.language
-  }
-
-  // Send error Array if error(s).
-  if (!_.isEmpty(errorArray)) {
-    return generalMiddleware.standardErrorResponse(res, errorArray, 'user.middleware.validateUpdateUser')
-  }
-
-  if (_.isEmpty(validatedData)) {
-    return generalMiddleware.standardErrorResponse(res, [{
-      field: 'general',
-      error: 1154,
-      message: 'No data provided to update.'
-    }], 'user.middleware.validateUpdateUser')
-  }
-
-  req.body = {
-    data: validatedData,
-    id: id
-  }
   return done()
 }
 

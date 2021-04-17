@@ -59,16 +59,15 @@ function getAllCategories(input) {
         order: [
           ['createdAt', 'DESC'],
         ],
-        // include: 
-        //     [
-        //         {
-        //             model: db.Product,
-        //             as: `relatedProducts`,
-        //             attributes: [`id`, `name`],
-        //             through: {attributes: []},
-        //             required: false,
-        //         }
-        //     ]
+        include: 
+            [
+                {
+                    model: db.Product,
+                    as: `relatedProducts`,
+                    attributes: [`id`, `name`, `image`],
+                    required: false,
+                }
+            ]
     })
 }
 

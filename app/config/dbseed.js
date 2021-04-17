@@ -4,8 +4,8 @@ module.exports = function dbseed (db, sequelize) {
   // Inserting predefined data
 
   db.Role.create({
-    name: 'Client',
-    description: 'System generated client',
+    name: 'Super Admin',
+    description: 'System generated roles',
     isActive: true,
     isDeleted: false
   })
@@ -16,7 +16,8 @@ module.exports = function dbseed (db, sequelize) {
         phone: '051456421',
         mobileNumber: '03001231234',
         email: `shahbaz@gmail.com`,
-        postalCode: 12345
+        postalCode: 12345,
+        RoleId: role.id
       })
 
       user.salt = user.makeSalt()

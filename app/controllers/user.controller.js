@@ -66,7 +66,7 @@ const resendOtp = function (req, res) {
 
 // Get Users
 const getUsers = function (req, res) {
-  return userHelper.getUsers(req.conditions, req.limit, req.offset)
+  return userHelper.getUsers(req.conditions)
     .then(function (data) {
       generalController.successResponse(res, 'Users fetched successfully.', data, 'user.controller.getUsers')
     }).catch(StandardError, function (err) {

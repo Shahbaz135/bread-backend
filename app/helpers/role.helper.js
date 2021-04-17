@@ -3,35 +3,13 @@ const db = require('../config/sequelize.config')
 const generalHelpingMethods = require('./general.helper')
 
 // Get Roles against companyId
-function getRoles (companyId, permissions) {
-  // Check if user has permissions to perform an action (get role)
-  const hasPermission = generalHelpingMethods.checkIfUserHasPermission('teamManagement', permissions)
-  if (!hasPermission) {
-    // User has no permission
-    return generalHelpingMethods.rejectPromise([{
-      field: '',
-      error: 5047,
-      message: 'User has no permission to get roles.'
-    }])
-  }
-  return db.User.findOne({
-    _id: companyId,
-    isDeleted: false
+function getRoles (input) {
+  let query = input;
+
+  return db.Role.findAll({
+    where: query,
   })
-    .then(company => {
-      if (!company) {
-        return generalHelpingMethods.rejectPromise([{
-          field: 'companyId',
-          error: 5048,
-          message: 'Company not exists against given companyId.'
-        }])
-      }
-      return db.Role.find({
-        CompanyId: companyId,
-        isDeleted: false
-      })
-    })
-    .catch(generalHelpingMethods.catchException)
+  .catch(generalHelpingMethods.catchException)
 }
 
 // Add role
