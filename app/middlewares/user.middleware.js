@@ -263,6 +263,32 @@ const validateUpdateUser = (req, res, done) => {
     validatedData.lName = body.lName
   }
 
+  // town is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('town') && !_.isEmpty(body.town)) {
+    // Validating as not empty, valid String and length range.
+    if (!_.isString(body.town) ) {
+      errorArray.push({
+        field: 'town',
+        error: 1136,
+        message: 'Please provide only valid \'town\' as string.'
+      })
+    }
+    validatedData.town = body.town
+  }
+
+  // houseStreetNumber is an optional string property, if it is given than validate it.
+  if (body.hasOwnProperty('houseStreetNumber') && !_.isEmpty(body.houseStreetNumber)) {
+    // Validating as not empty, valid String and length range.
+    if (!_.isString(body.houseStreetNumber) ) {
+      errorArray.push({
+        field: 'houseStreetNumber',
+        error: 1136,
+        message: 'Please provide only valid \'houseStreetNumber\' as string.'
+      })
+    }
+    validatedData.houseStreetNumber = body.houseStreetNumber
+  }
+
   // isReceiveEmail is an optional string property, if it is given than validate it.
   if (body.hasOwnProperty('isReceiveEmail')) {
     // Validating as not empty, valid String and length range.
@@ -286,6 +312,18 @@ const validateUpdateUser = (req, res, done) => {
       })
     }
     validatedData.RoleId = body.RoleId
+  }
+
+  if (body.hasOwnProperty('postalCode')) {
+    // Validating as not empty, valid String and length range.
+    if (_.isNaN(body.postalCode) ) {
+      errorArray.push({
+        field: 'postalCode',
+        error: 1136,
+        message: 'Please provide only valid \'postalCode\' as number.'
+      })
+    }
+    validatedData.postalCode = body.postalCode
   }
 
   // email is an optional string property, if it is given than validate it.

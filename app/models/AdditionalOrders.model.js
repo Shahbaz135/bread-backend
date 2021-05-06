@@ -24,14 +24,21 @@ module.exports = function (sequelize, DataTypes) {
     ,
     {
       associate: function (models) {
-        AdditionalOrder.hasMany(models.CustomerAdditionalOrder, { foreignKey: 'AdditionalOrderId', as: 'AdditionalOrderDetail' })
+        AdditionalOrder.hasMany(models.CustomerAdditionalOrder, { 
+          foreignKey: 'AdditionalOrderId', 
+          as: 'AdditionalOrderDetail' 
+        })
         AdditionalOrder.belongsTo(models.Customer, {
-          as: 'CustomerOrders',
+          as: 'CustomerAdditionalOrders',
           foreignKey: 'CustomerId'
         })
         AdditionalOrder.belongsTo(models.Partner, {
             as: 'PartnerOrders',
             foreignKey: 'PartnerId'
+        })
+        AdditionalOrder.hasMany(models.Invoice, { 
+          foreignKey: 'AdditionalOrderId', 
+          as: 'AdditionalOrderInvoice' 
         })
       }
     }

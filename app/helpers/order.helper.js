@@ -4,7 +4,8 @@ const _ = require('lodash')
 const SERVER_RESPONSE = require('../config/serverResponses')
 const db = require('../config/sequelize.config')
 const generalHelpingMethods = require('./general.helper')
-const helpingHelperMethods = require('./helping.helper')
+const invoiceService = require(`../services/invoice.service`);
+
 
 //// to create new order
 async function createOrder(data) {
@@ -42,6 +43,7 @@ function getOrder(input) {
     })
         .then((orders) => {
             // convert mongoose document object to plain json object and return user
+            invoiceService.initiateInvoice();
             return JSON.parse(JSON.stringify(orders))
         })
 }

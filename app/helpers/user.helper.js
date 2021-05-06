@@ -106,6 +106,10 @@ function login (input) {
         lName: userData.userInfo.lName,
         email: userData.userInfo.email,
         phone: userData.userInfo.phone,
+        mobileNumber: userData.userInfo.mobileNumber,
+        postalCode: userData.userInfo.postalCode,
+        town: userData.userInfo.town,
+        houseStreetNumber: userData.userInfo.houseStreetNumber,
         // RoleId: userData.userInfo.RoleId,
         // role: role.name
       }
@@ -171,6 +175,8 @@ function getUsers (conditions) {
 // }
 
 const updateUser = (data, id) => {
+  let userData = {};
+
   return db.User.findOne({
     where: {
       id: id,
@@ -217,6 +223,33 @@ const updateUser = (data, id) => {
       user.save()
 
       return user.toJSON()
+    })
+    .then (info => {
+      const tokenData = {
+        id: info.id,
+        fName: info.fName,
+        lName: info.lName,
+        email: info.email,
+        phone: info.phone,
+        mobileNumber: info.mobileNumber,
+        postalCode: info.postalCode,
+        town: info.town,
+        houseStreetNumber: info.houseStreetNumber,
+        // RoleId: userData.userInfo.RoleId,
+        // role: role.name
+      }
+
+      userData.userInfo = { ...tokenData,
+        isVerified: info.isVerified,
+        isBlocked: info.isBlocked,
+      }
+
+      return helpingHelperMethods.signLoginData({ data: tokenData })
+    })
+    .then((tokenData) => {
+      userData.tokenInfo = tokenData
+      // console.log(userData)
+      return userData
     })
 }
 

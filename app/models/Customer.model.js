@@ -180,6 +180,10 @@ module.exports = function(sequelize, DataTypes) {
                     foreignKey: 'CustomerId', 
                     as: 'CustomerOrders' 
                 })
+                Customer.hasMany(models.AdditionalOrder, { 
+                    foreignKey: 'CustomerId', 
+                    as: 'CustomerAdditionalOrders' 
+                })
                 Customer.belongsTo(models.User, {
                     as: 'UserCustomer',
                     foreignKey: 'UserId'
@@ -187,6 +191,10 @@ module.exports = function(sequelize, DataTypes) {
                 Customer.belongsTo(models.DeliveryArea, {
                     as: 'DeliveryAreaCustomer',
                     foreignKey: 'DeliveryAreaId'
+                })
+                Customer.hasMany(models.Invoice, { 
+                    foreignKey: 'CustomerId', 
+                    as: 'CustomerInvoice' 
                 })
             }
         }

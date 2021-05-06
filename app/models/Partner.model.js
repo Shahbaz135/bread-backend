@@ -110,6 +110,10 @@ module.exports = function(sequelize, DataTypes) {
                     foreignKey: 'PartnerId',
                     as: 'CreatedByPartner'
                 })
+                Partner.hasMany(models.Invoice, { 
+                    foreignKey: 'PartnerId',
+                    as: 'PartnerInvoice'
+                })
             }
         }
     )
