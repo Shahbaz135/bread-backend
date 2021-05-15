@@ -45,19 +45,6 @@ const validateGetAllCharge = (req, res, done) => {
       validatedQuery.id = query.id
     }
 
-    // // postCode Is required, validating as number
-    // if (query.hasOwnProperty('postCode') && query.postCode) {
-    //   if (!(query.postCode) || _.isNaN(query.postCode)) {
-    //     errorArray.push({
-    //       field: 'postCode',
-    //       error: 90220,
-    //       message: '\'postCode\' is required as Numeric .'
-    //     })
-    //   }
-    //   validatedQuery.postCode = query.postCode
-    // }
-    
-
     // send array if error(s)
     if (errorArray.length) {
         return generalMiddleware.standardErrorResponse(res, errorArray, 'deliveryCharge.middleware.validateGetAllCharge')

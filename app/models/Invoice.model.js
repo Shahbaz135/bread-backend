@@ -9,6 +9,12 @@ module.exports = function (sequelize, DataTypes) {
       amount: {
         type: DataTypes.FLOAT
       },
+      deliveryCharges: {
+        type: DataTypes.FLOAT
+      },
+      totalAmount: {
+        type: DataTypes.FLOAT
+      },
       dateFrom: {
         type: DataTypes.DATEONLY
       },

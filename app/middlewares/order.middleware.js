@@ -5,7 +5,7 @@ const generalMiddleware = require('./general.middleware')
 
 ///// validating create order
 const validateCreateOrder = (req, res, done) => {
-    const body = req.body
+    const body = req.body;
     // get all the errors in an array
     const errorArray = []
     const validatedConditions = {}
@@ -55,6 +55,24 @@ const validateCreateOrder = (req, res, done) => {
         field: 'overAllPrice',
         error: 90220,
         message: '\'overAllPrice\' is required as Numeric .'
+        })
+    }
+
+    // price Is required, validating as number
+    if (!(body.productPrice) || _.isNaN(body.productPrice)) {
+        errorArray.push({
+        field: 'productPrice',
+        error: 90220,
+        message: '\'productPrice\' is required as Numeric .'
+        })
+    }
+
+    // price Is required, validating as number
+    if (!(body.deliveryCharges) || _.isNaN(body.deliveryCharges)) {
+        errorArray.push({
+        field: 'deliveryCharges',
+        error: 90220,
+        message: '\'deliveryCharges\' is required as Numeric .'
         })
     }
 
@@ -123,6 +141,8 @@ const validateCreateOrder = (req, res, done) => {
     validatedConditions.CustomerId = body.customerId;
     validatedConditions.PartnerId = body.partnerId;
     validatedConditions.validFrom = body.validFrom;
+    validatedConditions.productPrice = body.productPrice;
+    validatedConditions.deliveryCharges = body.deliveryCharges;
     validatedConditions.overAllPrice = body.overAllPrice;
     validatedConditions.order = body.order;
 
@@ -346,6 +366,30 @@ const validateUpdateOrder = (req, res, done) => {
             })
         }
         validatedConditions.overAllPrice = body.overAllPrice;
+    }
+
+     // price Is optional, validating as number
+    if (body.hasOwnProperty('productPrice') && body.productPrice) {
+        if (!(body.productPrice) || _.isNaN(body.productPrice)) {
+            errorArray.push({
+            field: 'productPrice',
+            error: 90220,
+            message: '\'productPrice\' is required as Numeric .'
+            })
+        }
+        validatedConditions.productPrice = body.productPrice;
+    }
+
+     // price Is optional, validating as number
+    if (body.hasOwnProperty('deliveryCharges') && body.deliveryCharges) {
+        if (!(body.deliveryCharges) || _.isNaN(body.deliveryCharges)) {
+            errorArray.push({
+            field: 'deliveryCharges',
+            error: 90220,
+            message: '\'deliveryCharges\' is required as Numeric .'
+            })
+        }
+        validatedConditions.deliveryCharges = body.deliveryCharges;
     }
     
 

@@ -43,7 +43,7 @@ function getOrder(input) {
     })
         .then((orders) => {
             // convert mongoose document object to plain json object and return user
-            invoiceService.initiateInvoice();
+            // invoiceService.initiateInvoice();
             return JSON.parse(JSON.stringify(orders))
         })
 }
@@ -55,7 +55,7 @@ function getOrderById(input) {
   
     return db.Order.findOne({ 
         where: query,
-        attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`],
+        attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `productPrice`, `deliveryCharges`],
         include:
             [
                 {

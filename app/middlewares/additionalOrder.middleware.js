@@ -46,6 +46,24 @@ const validateCreateOrder = (req, res, done) => {
         })
     }
 
+    // price Is required, validating as number
+    if (!(body.productPrice) || _.isNaN(body.productPrice)) {
+        errorArray.push({
+        field: 'productPrice',
+        error: 90220,
+        message: '\'productPrice\' is required as Numeric .'
+        })
+    }
+
+    // price Is required, validating as number
+    if (!(body.deliveryCharges) || _.isNaN(body.deliveryCharges)) {
+        errorArray.push({
+        field: 'deliveryCharges',
+        error: 90220,
+        message: '\'deliveryCharges\' is required as Numeric .'
+        })
+    }
+
      // order Is required, validating as array
     if (!_.isArray(body.order)) {
         errorArray.push({
@@ -88,6 +106,8 @@ const validateCreateOrder = (req, res, done) => {
     validatedConditions.CustomerId = body.customerId;
     validatedConditions.PartnerId = body.partnerId;
     validatedConditions.deliveryDate = body.deliveryDate;
+    validatedConditions.productPrice = body.productPrice;
+    validatedConditions.deliveryCharges = body.deliveryCharges;
     validatedConditions.overAllPrice = body.overAllPrice;
     validatedConditions.order = body.order;
 

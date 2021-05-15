@@ -12,6 +12,12 @@ module.exports = function (sequelize, DataTypes) {
       overAllPrice: {
         type: DataTypes.FLOAT
       },
+      productPrice: {
+        type: DataTypes.FLOAT
+      },
+      deliveryCharges: {
+        type: DataTypes.FLOAT
+      },
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true

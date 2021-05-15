@@ -20,7 +20,7 @@ exports.initiateInvoice = (data) => {
             {
                 model: db.AdditionalOrder,
                 as: `CustomerAdditionalOrders`,
-                attributes: [`id`, `deliveryDate`, `status`, `overAllPrice`, `isActive`],
+                // attributes: [`id`, `deliveryDate`, `status`, `overAllPrice`, `isActive`],
                 required: false,
                 include: [
                     {
@@ -42,7 +42,7 @@ exports.initiateInvoice = (data) => {
             {
                 model: db.Order,
                 as: `CustomerOrders`,
-                attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `isTrail`, `isActive`, `isOneTime`],
+                // attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `isTrail`, `isActive`, `isOneTime`],
                 required: false,
                 include: [
                     {
@@ -70,7 +70,6 @@ exports.initiateInvoice = (data) => {
             /// normal orders
             if (customer.CustomerOrders.length > 0) {
                 for (let order of customer.CustomerOrders) {
-                    
                     let foundDays = order.OrderDetail.map(x => x.OrderDay.id);
                     foundDays = _.uniq(foundDays);
                     let totalAmount = 0;
@@ -89,7 +88,9 @@ exports.initiateInvoice = (data) => {
                             if (order.isOneTime) {
                                 //// checking valid from date
                                 let validFromDate = new Date(order.validFrom);
+                                validFromDate = validFromDate.toISOString().split('T')[0];
                                 let expiryDate = new Date(order.expiryDate);
+                                expiryDate = expiryDate.toISOString().split('T')[0];
 
 
                                 let date = new Date();
@@ -97,19 +98,16 @@ exports.initiateInvoice = (data) => {
                                 let currentYear = date.getFullYear();
 
                                 let monthDays = getAllDaysInMonth(currentYear, currentMonth+1, orderDay);
+                                // console.log(`Month Days === `, monthDays);
                                 
                                 let finalDays = [];
                                 for ( let d of monthDays) {
-                                    if (d.toISOString() >= validFromDate.toISOString() && d.toISOString() <= expiryDate.toISOString()) {
+                                    d = d.toISOString().split('T')[0];
+                                    if (d >= validFromDate && d <= expiryDate) {
                                         finalDays.push(d);
                                     }
                                 }
                                 countDay = finalDays.length;
-
-                                // for (let detail of found) {
-                                //     let total = Number(detail.price) * Number(detail.quantity) * Number(countDay);
-                                //     totalAmount = totalAmount + total;
-                                // }
                             } else {
                                 //// checking valid from date
                                 let orderDate = new Date(order.validFrom);
@@ -117,6 +115,8 @@ exports.initiateInvoice = (data) => {
                                 let date = new Date();
                                 let currentMonth = date.getMonth();
                                 let currentYear = date.getFullYear();
+
+                                
 
                                 let currentMonthYear = currentMonth + `-` + currentYear;
 
@@ -126,7 +126,9 @@ exports.initiateInvoice = (data) => {
                                     let finalDays = [];
                                     for ( let d of monthDays) {
                                         let validFrom = new Date(order.validFrom);
-                                        if (d.toISOString() >= validFrom.toISOString()) {
+                                        validFrom = validFrom.toISOString().split('T')[0];
+                                        d = d.toISOString().split('T')[0];
+                                        if (d >= validFrom) {
                                             finalDays.push(d);
                                         }
                                     }
@@ -134,11 +136,6 @@ exports.initiateInvoice = (data) => {
                                 } else {
                                     countDay = getAllDaysInMonth(currentYear, currentMonth+1, orderDay).length;
                                 }
-
-                                // for (let detail of found) {
-                                //     let total = Number(detail.price) * Number(detail.quantity) * Number(countDay);
-                                //     totalAmount = totalAmount + total;
-                                // }
                             }
 
                             for (let detail of found) {
@@ -148,7 +145,10 @@ exports.initiateInvoice = (data) => {
                         }
                     }
 
-                    totalAmount = Number(totalAmount.toFixed(2));
+                    totalAmount = Number(totalAmount.toFixed(3));
+
+                    let deliveryCharges = order.deliveryCharges;
+                    let grandTotal = totalAmount + deliveryCharges;
 
                     /// getting current month date
                     let date = new Date();
@@ -157,6 +157,8 @@ exports.initiateInvoice = (data) => {
 
                     let data = {
                         amount: totalAmount,
+                        deliveryCharges: deliveryCharges,
+                        totalAmount: grandTotal,
                         CustomerId: customer.id,
                         OrderId: order.id,
                         PartnerId: customer.PartnerId,
@@ -219,6 +221,9 @@ exports.initiateInvoice = (data) => {
 
                     totalAmount = Number(totalAmount.toFixed(2));
 
+                    let deliveryCharges = order.deliveryCharges;
+                    let grandTotal = totalAmount + deliveryCharges;
+
                     /// getting current month date
                     let date = new Date();
                     let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -226,6 +231,8 @@ exports.initiateInvoice = (data) => {
 
                     let data = {
                         amount: totalAmount,
+                        deliveryCharges: deliveryCharges,
+                        totalAmount: grandTotal,
                         CustomerId: customer.id,
                         AdditionalOrderId: order.id,
                         PartnerId: customer.PartnerId,
@@ -261,7 +268,7 @@ function getAllDaysInMonth(year, month, dayNumber) {
       firstOf.setDate(firstOf.getDate() + 7);
     }
     return dates;
-  }
+}
 
 async function createInvoice (data) {
     let invoiceNumber;
