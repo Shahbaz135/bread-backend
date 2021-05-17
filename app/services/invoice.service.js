@@ -20,6 +20,7 @@ exports.initiateInvoice = (data) => {
             {
                 model: db.AdditionalOrder,
                 as: `CustomerAdditionalOrders`,
+                where: query,
                 // attributes: [`id`, `deliveryDate`, `status`, `overAllPrice`, `isActive`],
                 required: false,
                 include: [
@@ -42,6 +43,7 @@ exports.initiateInvoice = (data) => {
             {
                 model: db.Order,
                 as: `CustomerOrders`,
+                where: query,
                 // attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `isTrail`, `isActive`, `isOneTime`],
                 required: false,
                 include: [

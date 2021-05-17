@@ -56,6 +56,7 @@ const getPDF = function (req, res) {
 const PDFTest = function (req, res) {
     let query = req.conditions;
     query.isDeleted = false;
+    query.isActive = true;
   
     db.Invoice.findOne({ 
         where: query,
