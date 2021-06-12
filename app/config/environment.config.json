@@ -22,11 +22,11 @@
       "database": ""
     },
     "production": {
-      "username": "bread_root",
+      "username": "brigubxr_bread",
       "password": "Bread@321",
       "host": "localhost",
       "port": 3306,
-      "database": "brotchengold_auth_production" 
+      "database": "brigubxr_brotchengold_auth_production" 
     }
   },
   "FORCE_DB_SYNC": "false",
