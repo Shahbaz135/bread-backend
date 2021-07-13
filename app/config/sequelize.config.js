@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'production') {
 let sequelize =
   new Sequelize(process.env.DB_DATABASE || configDb.database, process.env.DB_USERNAME || configDb.username, process.env.DB_PASSWORD || configDb.password, {
     host: process.env.DB_HOSTNAME || configDb.host,
-    port: 3307,
+    port: 3306,
     dialect: 'mysql'
     // query:{raw:true}
   })

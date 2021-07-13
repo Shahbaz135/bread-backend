@@ -43,7 +43,7 @@ function getOrder(input) {
     })
         .then((orders) => {
             // convert mongoose document object to plain json object and return user
-            // invoiceService.initiateInvoice();
+            invoiceService.initiateInvoice();
             return JSON.parse(JSON.stringify(orders))
         })
 }
