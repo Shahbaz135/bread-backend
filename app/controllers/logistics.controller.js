@@ -348,6 +348,351 @@ const getSupplierOrderPDF = function (req, res) {
     })
 }
 
+const getDeliveryListPDF = function (req, res) {
+    let query = {};
+    let givenDate = req.conditions.date;
+    let givenDay = new Date(givenDate).getDay();
+    if (givenDay == 0) {
+        givenDay = 7;
+    }
+    // query = req.conditions;
+    query.isDeleted = false;
+    query.isActive = true;
+
+    let allProducts = [];
+    let totalNumber = 0;
+  
+    return db.Customer.findAll({ 
+        where: query,
+        attributes: { exclude: ['password', 'salt']},
+        include:
+        [
+            {
+                model: db.AdditionalOrder,
+                as: `CustomerAdditionalOrders`,
+                where: {
+                    deliveryDate: {
+                        [Op.gte]: givenDate
+                    }, 
+                    isActive: true,
+                    isDeleted: false
+                },
+                // attributes: [`id`, `deliveryDate`, `status`, `overAllPrice`, `isActive`],
+                required: false,
+                include: [
+                    {
+                        model: db.CustomerAdditionalOrder,
+                        as: `AdditionalOrderDetail`,
+                        attributes: [`id`, `quantity`, `product`, `price`],
+                        required: false,
+                        include: [
+                            {
+                            model: db.WeekDays,
+                            as: `OrderDay`,
+                            attributes: [`id`, `day`],
+                            required: false,
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                model: db.Order,
+                as: `CustomerOrders`,
+                where: {
+                    // validFrom: {
+                    //     [Op.gte]: date
+                    // },
+                    isActive: true,
+                    isDeleted: false
+                },
+                // attributes: [`id`, `validFrom`, `expiryDate`, `status`, `overAllPrice`, `isTrail`, `isActive`, `isOneTime`],
+                required: false,
+                include: [
+                    {
+                        model: db.CustomerOrder,
+                        as: `OrderDetail`,
+                        attributes: [`id`, `quantity`, `product`, `price`],
+                        required: false,
+                        include: [
+                            {
+                            model: db.WeekDays,
+                            as: `OrderDay`,
+                            attributes: [`id`, `day`],
+                            required: false,
+                            }
+                        ]
+                    }
+                ]
+            },
+        ]
+    })
+    .then(details => {
+        details = JSON.parse(JSON.stringify(details));
+
+        for(let customer of details) {
+            /// normal orders
+            if (customer.CustomerOrders.length > 0) {
+                for (let order of customer.CustomerOrders) {
+                    let foundDays = order.OrderDetail.map(x => x.OrderDay.id);
+                    foundDays = _.uniq(foundDays);
+                    let filteredDay = foundDays.find(x => x == givenDay);
+                   
+
+                    if(filteredDay) {
+                        // for (let day of foundDays) {
+                            let orderDay = 1;
+                            if (filteredDay === 7) {
+                                orderDay = 1;
+                            } else {
+                                orderDay = filteredDay + 1;
+                            }
+            
+                            let found = order.OrderDetail.filter(x => x.OrderDay.id === filteredDay);
+                            let countDay;
+                            let selectedDaysInMonth = [];
+                            if (found) {
+                                if (order.isOneTime) {
+                                    //// checking valid from date
+                                    let validFromDate = new Date(order.validFrom);
+                                    validFromDate = validFromDate.toISOString().split('T')[0];
+                                    let expiryDate = new Date(order.expiryDate);
+                                    expiryDate = expiryDate.toISOString().split('T')[0];
+    
+    
+                                    let date = new Date();
+                                    let currentMonth = date.getMonth();
+                                    let currentYear = date.getFullYear();
+    
+                                    let monthDays = getAllDaysInMonth(currentYear, currentMonth+1, orderDay);
+                                    
+                                    let finalDays = [];
+                                    for ( let d of monthDays) {
+                                        d = d.toISOString().split('T')[0];
+                                        if (d >= validFromDate && d <= expiryDate) {
+                                            finalDays.push(d);
+                                        }
+                                    }
+                                    selectedDaysInMonth = finalDays;
+                                    countDay = finalDays.length;
+                                } else {
+                                    //// checking valid from date
+                                    let orderDate = new Date(order.validFrom);
+                                    orderDate = orderDate.getMonth() + `-` + orderDate.getFullYear();
+                                    let date = new Date();
+                                    let currentMonth = date.getMonth();
+                                    let currentYear = date.getFullYear();
+    
+                                    let currentMonthYear = currentMonth + `-` + currentYear;
+    
+                                    if (orderDate == currentMonthYear) {
+                                        // console.log(getAllDaysInMonth(currentYear, currentMonth+1, orderDay));
+                                        let monthDays = getAllDaysInMonth(currentYear, currentMonth+1, orderDay);
+                                        let finalDays = [];
+                                        for ( let d of monthDays) {
+                                            let validFrom = new Date(order.validFrom);
+                                            validFrom = validFrom.toISOString().split('T')[0];
+                                            d = d.toISOString().split('T')[0];
+                                            if (d >= validFrom) {
+                                                finalDays.push(d);
+                                            }
+                                        }
+                                        selectedDaysInMonth = finalDays;
+                                        countDay = finalDays.length;
+                                    } else {
+                                        countDay = getAllDaysInMonth(currentYear, currentMonth+1, orderDay).length;
+                                        selectedDaysInMonth = getAllDaysInMonth(currentYear, currentMonth+1, orderDay);
+                                    }
+                                }
+
+                                givenDate = new Date(givenDate);
+                                givenDate = givenDate.toISOString().split('T')[0];
+
+                                let foundDaysInMonth = selectedDaysInMonth.find(x => x == givenDate);
+
+                                if (foundDaysInMonth) {
+                                    for (let detail of found) {
+                                        let customerData = {
+                                            id: customer.id,
+                                            customerName: customer.fName + ' ' + customer.lName,
+                                            houseStreetNumber: customer.houseStreetNumber,
+                                            postalCode: customer.postalCode,
+                                            town: customer.town,
+                                            products: []
+                                        }
+
+                                        let productData = {
+                                            product: detail.product,
+                                            quantity: detail.quantity
+                                        }
+                                       
+                                        /// first searching if customer already exist
+                                        let index = allProducts.findIndex(x => x.id == customer.id);
+                                        if (index > -1) {
+                                            /// then searching if product is already added
+                                            let productIndex = allProducts[index].products.findIndex(x => x.product == detail.product);
+                                            if (productIndex > -1) {
+                                                allProducts[index].products[productIndex].quantity =  allProducts[index].products[productIndex].quantity + detail.quantity
+                                            } else {
+                                                allProducts[index].products.push(productData);
+                                            }
+                                        } else {
+                                            customerData.products.push(productData);
+                                            allProducts.push(customerData);
+                                        }
+
+                                        totalNumber = totalNumber + Number(detail.quantity);
+                                    }
+                                }
+                            }
+                        // }
+                    }
+                }
+            }
+            if (customer.CustomerAdditionalOrders.length > 0) {
+                for (let order of customer.CustomerAdditionalOrders) {
+                    
+                    let foundDays = order.AdditionalOrderDetail.map(x => x.OrderDay.id);
+                    foundDays = _.uniq(foundDays);
+                    let filteredDay = foundDays.find(x => x == givenDay);
+
+                    if (filteredDay) {
+                        // for (let day of foundDays) {
+                            let orderDay = 1;
+                            if (filteredDay === 7) {
+                                orderDay = 1;
+                            } else {
+                                orderDay = filteredDay + 1;
+                            }
+            
+                            let found = order.AdditionalOrderDetail.filter(x => x.OrderDay.id === filteredDay);
+    
+                            if (found) {
+                                //// checking delivery date
+                                let deliveryDate = new Date(order.deliveryDate);
+                                let deliveryMonth = deliveryDate.getMonth();
+                                let deliveryYear = deliveryDate.getFullYear();
+                                
+                                let monthYear = deliveryMonth + `-` + deliveryYear;
+    
+                                let date = new Date();
+                                let currentMonth = date.getMonth();
+                                let currentYear = date.getFullYear();
+                                
+                                let currentMonthYear = currentMonth + `-` + currentYear;
+    
+                                //// checking delivery is in current month
+                                if (monthYear === currentMonthYear) {
+                                    for (let detail of found) {
+                                        let customerData = {
+                                            id: customer.id,
+                                            customerName: customer.fName + ' ' + customer.lName,
+                                            houseStreetNumber: customer.houseStreetNumber,
+                                            postalCode: customer.postalCode,
+                                            town: customer.town,
+                                            products: []
+                                        }
+
+                                        let productData = {
+                                            product: detail.product,
+                                            quantity: detail.quantity
+                                        }
+
+                                       /// first searching if customer already exist
+                                       let index = allProducts.findIndex(x => x.id == customer.id);
+                                       if (index > -1) {
+                                           /// then searching if product is already added
+                                           let productIndex = allProducts[index].products.findIndex(x => x.product == detail.product);
+                                           if (productIndex > -1) {
+                                               allProducts[index].products[productIndex].quantity =  allProducts[index].products[productIndex].quantity + detail.quantity
+                                           } else {
+                                               allProducts[index].products.push(productData);
+                                           }
+                                       } else {
+                                            customerData.products.push(productData);
+                                            allProducts.push(customerData);
+                                       }
+
+                                        totalNumber = totalNumber + Number(detail.quantity);
+                                    }
+                                }                   
+                            }
+                        // }
+                    }
+                }
+            }
+        }
+    })
+    .then(() => {
+        givenDate = new Date(givenDate);
+        givenDate = givenDate.toISOString().split('T')[0];
+
+        let name = `supplier-order-.pdf`;
+        let filePath = path.join('documents', 'supplier-orders', name);
+
+        // Create a document
+        let invoiceName = 'supplier-order.pdf';
+        const invoicePath = path.join('documents', 'supplier-orders', invoiceName);
+        const pdfDoc = new PDFDocument();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+        'Content-Disposition',
+        'inline; filename="' + invoiceName + '"'
+        );
+    
+        // Generating pdf
+        pdfDoc.pipe(fs.createWriteStream(invoicePath));
+        pdfDoc.pipe(res);
+
+        /// header
+        pdfDoc.image('public/assets/images/header.png', 0, 0, {width: 615})
+        /// footer
+        pdfDoc.image('public/assets/images/foter.png', 0, 575, {width: 615})
+
+        pdfDoc.font('Times-Bold').fontSize(11).text( 'Delivery List', 35, 150);
+        pdfDoc.font('Times-Bold').fontSize(11).text( 'Date: ' + givenDate, 400, 150);
+
+        /// heading
+        pdfDoc.font('Times-Roman').fontSize(11).text( 'Pos', 35, 180);
+        pdfDoc.font('Times-Roman').fontSize(11).text( 'Customer', 65, 180);
+        pdfDoc.font('Times-Roman').fontSize(11).text( 'Street', 175, 180);
+        pdfDoc.font('Times-Roman').fontSize(11).text( 'Town', 325, 180);
+
+        /// Message to customer
+        // pdfDoc.font('Times-Bold').fontSize(12).text('Delivery List for ' + givenDate + `,`, 35, 180);
+        // pdfDoc.font('Times-Roman').fontSize(11).text('We thank you for the orders and provide you with the following delivers as agreed charged:', 35, 288);
+
+        // product details
+        let rowHeight = 200;
+        let productRow = 220;
+        let pos = 1;
+        for(let customer of allProducts) {
+            /// customer info
+            pdfDoc.font('Times-Bold').fontSize(11).text( pos , 35, rowHeight);
+            pdfDoc.font('Times-Bold').fontSize(11).text(  customer.customerName, 55, rowHeight);
+            pdfDoc.font('Times-Bold').fontSize(11).text(  customer.houseStreetNumber, 175, rowHeight);
+            pdfDoc.font('Times-Bold').fontSize(11).text(  customer.postalCode + ' ' + customer.town, 325, rowHeight);
+
+            /// product info
+            let productCol = 35;
+            for (let product of customer.products) {
+                pdfDoc.font('Times-Roman').fontSize(11).text( product.quantity + ' ' + product.product , productCol, productRow);
+                productCol = productCol + 75;
+            }
+           
+
+            //// line under text
+            createRow(pdfDoc, 335 + rowHeight);
+
+            rowHeight = rowHeight + 50;
+            productRow = productRow + 50;
+            pos = pos + 1;
+        }
+
+        pdfDoc.end();
+    })
+}
+
 function getAllDaysInMonth(year, month, dayNumber) {
     var d = new Date(year, --month, 1);
     var dates = [];
@@ -361,9 +706,18 @@ function getAllDaysInMonth(year, month, dayNumber) {
     return dates;
 }
 
+function createRow(doc, heigth) {
+    doc.lineWidth(0.3);
+    doc.lineCap('butt')
+        .moveTo(35, heigth)
+        .lineTo(570, heigth)
+        .stroke()
+};
+
 
 module.exports = {
     getOrderSupplier,
     getDeliveryList,
-    getSupplierOrderPDF
+    getSupplierOrderPDF,
+    getDeliveryListPDF
 }

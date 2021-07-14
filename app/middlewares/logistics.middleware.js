@@ -99,8 +99,35 @@ const validateGetPDF = (req, res, done) => {
     done()
 }
 
+const validateGetDeliveryListPDF = (req, res, done) => {
+    const errorArray = []
+    const query = req.query
+    const validatedQuery = {}
+
+    // date is an optional numeric property, if it is given than validate it.
+    if (query.hasOwnProperty('date') && query.date) {
+        // Validating as not empty, valid numeric value with range.
+        validatedQuery.date = query.date
+    }
+    
+    // tour is an optional numeric property, if it is given than validate it.
+    if (query.hasOwnProperty('tour') && query.tour) {
+        // Validating as not empty, valid numeric value with range.
+        validatedQuery.tour = query.tour
+    }
+    
+
+    if (!_.isEmpty(errorArray)) {
+        return generalMiddleware.standardErrorResponse(res, errorArray, 'logistics.middleware.validateGetPDF')
+    }
+
+    req.conditions = validatedQuery
+    done()
+}
+
 module.exports = {
     validateGetOrderSupplier,
     validateGetDeliveryList,
-    validateGetPDF
+    validateGetPDF,
+    validateGetDeliveryListPDF
 }

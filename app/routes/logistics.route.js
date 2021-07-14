@@ -15,4 +15,6 @@ module.exports = function (app, apiVersion) {
 
     app.get(route + '/logistics/orderSupplier/getPDF', logisticsMiddleware.validateGetPDF, logisticsController.getSupplierOrderPDF)
 
+    app.get(route + '/logistics/deliveryList/getPDF', logisticsMiddleware.validateGetDeliveryListPDF, logisticsController.getDeliveryListPDF)
+
 }
