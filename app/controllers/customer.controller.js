@@ -38,7 +38,7 @@ const updateCustomer = function (req, res) {
       }).catch(function (err) {
         generalController.errorResponse(res, err, 'Please check originalError for details', 'customer.controller.updateCustomer', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
       })
-  }
+}
 
 const getCustomerById = function (req, res) {
     return customerHelper.getCustomerById(req.conditions)

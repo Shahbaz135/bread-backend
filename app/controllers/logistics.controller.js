@@ -627,8 +627,8 @@ const getDeliveryListPDF = function (req, res) {
         givenDate = new Date(givenDate);
         givenDate = givenDate.toISOString().split('T')[0];
 
-        let name = `supplier-order-.pdf`;
-        let filePath = path.join('documents', 'supplier-orders', name);
+        let name = `delivery-list.pdf`;
+        let filePath = path.join('documents', 'delivery-list', name);
 
         // Create a document
         let invoiceName = 'supplier-order.pdf';

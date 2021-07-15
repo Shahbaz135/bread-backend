@@ -1,5 +1,6 @@
 'use strict'
 
+const { isEmpty } = require('lodash')
 const _ = require('lodash')
 const generalMiddleware = require('./general.middleware')
 
@@ -89,6 +90,19 @@ const validateGet = (req, res, done) => {
         validatedQuery.OrderId = query.OrderId
     }
 
+    // status is an optional numeric property, if it is given than validate it.
+    if (query.hasOwnProperty('status') && query.status) {
+        // Validating as not empty, valid numeric value with range.
+        if (isEmpty(query.status)) {
+        errorArray.push({
+            field: 'status',
+            error: 5010,
+            message: 'Please provide only valid \'status\' as string.'
+        })
+        }
+        validatedQuery.status = query.status
+    }
+
 
     if (!_.isEmpty(errorArray)) {
         return generalMiddleware.standardErrorResponse(res, errorArray, 'invoice.middleware.validateGet')
@@ -149,8 +163,58 @@ const validateGetPDF = (req, res, done) => {
     done()
 }
 
+///// update invoice
+const validateUpdateInvoice = (req, res, done) => {
+    const errorArray = []
+    const body = req.body
+    let id = req.params.id
+    const validatedData = {}
+
+    // id is required, validating as not empty, valid numeric value with range.
+    if (!id || isNaN(id)) {
+        errorArray.push({
+        field: 'id',
+        error: 1132,
+        message: '\'id\' is required as numeric in params.'
+        })
+    }
+
+    // status is an optional string property, if it is given than validate it.
+    if (body.hasOwnProperty('status') && body.status ) {
+        // Validating as not empty, valid String and length range.
+        if ( !_.isString(body.status)) {
+        errorArray.push({
+            field: 'status',
+            error: 1133,
+            message: 'Please provide only valid \'status\' as string,.'
+        })
+        }
+        validatedData.status = body.status
+    }
+
+    // Send error Array if error(s).
+    if (!_.isEmpty(errorArray)) {
+        return generalMiddleware.standardErrorResponse(res, errorArray, 'invoice.middleware.validateUpdateInvoice')
+    }
+
+    if (_.isEmpty(validatedData)) {
+        return generalMiddleware.standardErrorResponse(res, [{
+        field: 'general',
+        error: 1154,
+        message: 'No data provided to update.'
+        }], 'invoice.middleware.validateUpdateInvoice')
+    }
+
+  req.body = {
+    data: validatedData,
+    id: id
+  }
+  return done()
+}
+
 module.exports = {
     validateCreate,
     validateGet,
-    validateGetPDF
+    validateGetPDF,
+    validateUpdateInvoice
 }

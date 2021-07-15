@@ -1,7 +1,9 @@
 'use strict'
 
 const userMiddleware = require('../middlewares/user.middleware')
+const bankMiddleware = require('../middlewares/bankDetail.middleware')
 const userController = require('../controllers/user.controller')
+const bankController = require('../controllers/bankDetail.controller')
 const passport = require('../config/passport') 
 
 module.exports = function (app, apiVersion) { 
@@ -28,5 +30,10 @@ module.exports = function (app, apiVersion) {
   // check user password
   app.post(route + '/check-password', passport.authenticate('jwt', { session: false }), userMiddleware.validateLoginCredentials, userController.checkPassword)
 
-  
+
+  /////// bank details ////////
+  app.get(route + '/user/bank/get', passport.authenticate('jwt', { session: false }), bankMiddleware.validateGetBankDetails, bankController.getBankDetail)
+
+  // update user
+  app.post(route + '/user/bank/update', passport.authenticate('jwt', { session: false }), bankMiddleware.validateUpdateBankDetail, bankController.updateBankDetail)
 }

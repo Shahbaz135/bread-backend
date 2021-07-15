@@ -15,6 +15,9 @@ module.exports = function (sequelize, DataTypes) {
       totalAmount: {
         type: DataTypes.FLOAT
       },
+      status: {
+        type: DataTypes.STRING
+      },
       dateFrom: {
         type: DataTypes.DATEONLY
       },

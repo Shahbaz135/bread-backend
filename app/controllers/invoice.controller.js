@@ -6,6 +6,7 @@ const StandardError = require('standard-error')
 const generalController = require('./general.controller')
 
 const PDFDocument = require('pdfkit');
+var SEPA = require("sepa");
 const _ = require('lodash')
 const path = require('path');
 const fs = require('fs');
@@ -33,6 +34,42 @@ const get = function (req, res) {
         }).catch((err) => {
             generalController.errorResponse(res, err, 'Please check originalError for details', 'invoice.controller. get', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
         })
+}
+
+/// update
+const updateInvoice = function (req, res) {
+    return invoiceHelper.updateInvoice(req.body.data, req.body.id)
+      .then(function (data) {
+        generalController.successResponse(res, 'Successfully updated the invoice status', data, 'invoice.controller.updateInvoice')
+      }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'invoice.controller.updateInvoice', SERVER_RESPONSE.VALIDATION_ERROR)
+      }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'invoice.controller.updateInvoice', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+      })
+}
+
+/// send email
+const sendEmail = function (req, res) {
+    return invoiceHelper.sendEmail(req.body)
+      .then(function (data) {
+        generalController.successResponse(res, 'Email sendt Successfully', data, 'invoice.controller.sendEmail')
+      }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'invoice.controller.sendEmail', SERVER_RESPONSE.VALIDATION_ERROR)
+      }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'invoice.controller.sendEmail', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+      })
+}
+
+/// for billing
+const getInvoicesForBilling = function (req, res) {
+    return invoiceHelper.invoicesForBilling(req.body)
+      .then(function (data) {
+        generalController.successResponse(res, 'Record Fetched Successfully', data, 'invoice.controller.getInvoicesForBilling')
+      }).catch(StandardError, function (err) {
+        generalController.errorResponse(res, err, null, 'invoice.controller.getInvoicesForBilling', SERVER_RESPONSE.VALIDATION_ERROR)
+      }).catch(function (err) {
+        generalController.errorResponse(res, err, 'Please check originalError for details', 'invoice.controller.getInvoicesForBilling', SERVER_RESPONSE.INTERNAL_SERVER_ERROR)
+      })
 }
 
 // To Get Errors
@@ -122,7 +159,7 @@ const PDFTest = function (req, res) {
             try {
                 if (fs.existsSync(filePath)) {
                     //if file exist then return that file
-                    console.log(`File Exist`);
+                    console.log(`---- File Exist ---`);
                     const file = fs.readFileSync(filePath, (err, data) => {
                         if (err) {
                             return error;
@@ -130,7 +167,7 @@ const PDFTest = function (req, res) {
                         res.setHeader('Content-Type', 'application/pdf');
                         res.setHeader(
                         'Content-Disposition',
-                        'inline; filename="' + name + '"'
+                        'attachment; filename="' + name + '"'
                         );
 
                         res.send(data);
@@ -335,7 +372,7 @@ const PDFTest = function (req, res) {
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader(
             'Content-Disposition',
-            'inline; filename="' + invoiceName + '"'
+            'attachment; filename="' + invoiceName + '"'
             );
         
             // Generating pdf
@@ -492,9 +529,135 @@ function getAllDaysInMonth(year, month, dayNumber) {
     return dates;
 }
 
+const generateXML = function (req, res) {
+    // console.log(req.query);
+
+    // let query = req.query;
+    // query.isDeleted = false;
+  
+    // return db.Invoice.findAll({ 
+    //     where: query,
+    //     order: [
+    //         ['createdAt', 'DESC'],
+    //     ],
+    //     include: 
+    //         [
+    //             {
+    //                 model: db.Customer,
+    //                 as: `CustomerInvoice`,
+    //                 attributes: [`id`, `fName`, `lName`, `email`, `postalCode`, `town`, `bankAccountOwner`, 'code', 'iban', 'paymentType'],
+    //                 required: false,
+    //             }
+    //         ]
+    // })
+    //     .then((invoices) => {
+    //         // convert mongoose document object to plain json object and return user
+    //         invoices = JSON.parse(JSON.stringify(invoices));
+    //         console.log(invoices);
+
+    //         let billingInvoices = [];
+
+    //         for (let invoice of invoices) {
+    //             let findIndex = billingInvoices.findIndex(x => x.dateFrom == invoice.dateFrom && x.dateTo == invoice.dateTo);
+    //             if (findIndex > -1) {
+    //                 billingInvoices[findIndex].grossAmount = billingInvoices[findIndex].grossAmount + invoice.totalAmount;
+
+    //                 if (invoice.CustomerInvoice.paymentType == 'Direct debit') {
+    //                     billingInvoices[findIndex].sepaCustomers = billingInvoices[findIndex].sepaCustomers + 1;
+    //                     billingInvoices[findIndex].sepaAmount = billingInvoices[findIndex].sepaAmount + invoice.totalAmount;
+    //                 }
+    //             } else {
+    //                 let obj = {
+    //                     id: invoice.id,
+    //                     dateFrom: invoice.dateFrom,
+    //                     dateTo: invoice.dateTo,
+    //                     grossAmount: invoice.totalAmount,
+    //                     sepaCustomers: 0,
+    //                     sepaAmount: 0
+    //                 };
+
+    //                 if (invoice.CustomerInvoice.paymentType == 'Direct debit') {
+    //                     obj.sepaCustomers = obj.sepaCustomers + 1;
+    //                     obj.sepaAmount = obj.sepaAmount + invoice.totalAmount
+    //                 }
+
+    //                 billingInvoices.push(obj);
+    //             }
+    //         }
+    //         return billingInvoices
+    //     })
+    //     .then(billingInvoices => {
+    //         /// vat & net
+    //         for (let invoice of billingInvoices) {
+    //             let vat = 0;
+    //             let net = 0;
+
+    //             net = invoice.grossAmount/1.07;
+    //             vat = invoice.grossAmount - net;
+
+    //             invoice.net = Number(net.toFixed(3));
+    //             invoice.vat = Number(vat.toFixed(3));
+    //             invoice.grossAmount = Number(invoice.grossAmount.toFixed(3));
+    //             invoice.sepaAmount = Number(invoice.sepaAmount.toFixed(3))
+    //         }
+    //     })
+
+    //// generating XML
+    var doc = new SEPA.Document('pain.001.001.03');
+    doc.grpHdr.id = "XMPL.20140201.TR0";
+    doc.grpHdr.created = new Date();
+    doc.grpHdr.initiatorName = "EXPRESS BRÖTCHEN DE";
+    
+    var info = doc.createPaymentInfo();
+    info.requestedExecutionDate = new Date();
+    info.debtorIBAN = "DE15700520600022425508";
+    info.debtorBIC = "BYLADEM1LLD";
+    info.debtorName = "EXPRESS BRÖTCHEN DE";
+    info.debtorId = "DE88ZZZ00001794340";
+    doc.addPaymentInfo(info);
+    
+    var tx = info.createTransaction();
+    tx.creditorName = "Example Customer";
+    tx.creditorIBAN = "DE40987654329876543210";
+    tx.creditorBIC = "CUSTDEM0XXX";
+    tx.mandateId = "XMPL.CUST487.2014";
+    tx.mandateSignatureDate = new Date("2014-02-01");
+    tx.amount = 50.23;
+    tx.remittanceInfo = "INVOICE 54";
+    tx.end2endId = "XMPL.CUST487.INVOICE.54";
+    info.addTransaction(tx);
+
+
+    var xmldoc = doc.toString();
+
+    const xmlPath = path.join('documents', 'xml', 'test.xml');
+
+    fs.writeFile(xmlPath, xmldoc, function(err) {
+        if(err) { return console.log(err); } 
+           console.log("The file was saved!");    
+        });
+
+        const file = fs.readFile(xmlPath, (err, data) => {
+        if (err) {
+            return error;
+        } 
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="' + 'test.xml' + '"'
+        );
+
+        res.send(data);
+    });
+}
+
 module.exports = {
     create,
     get,
     getPDF,
-    PDFTest
+    PDFTest,
+    updateInvoice,
+    sendEmail,
+    getInvoicesForBilling,
+    generateXML
 }
